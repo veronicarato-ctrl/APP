@@ -6,6 +6,7 @@ import type { ISODate, Slot, TripState } from "../model/types";
 import { fmtDay } from "./format";
 import { IssueBox, Sources, T, TypePill, typeVars } from "./primitives";
 import { dayRegions, regionColor } from "./regions";
+import { DayZone, TransportZone, TzNotice } from "./zone";
 
 export interface ItineraryActions {
   editSlot: (date: ISODate, slotId: string | null) => void;
@@ -44,7 +45,9 @@ function DayCard({ s, date, n, issues, actions }: { s: TripState; date: ISODate;
         </div>
         <p className="text-[15px] font-semibold mt-0.5">{places.slice(0, 3).join(" · ")}</p>
         <p className="text-xs text-soft">{regionNames.join(" → ")}</p>
+        <DayZone s={s} date={date} />
       </header>
+      <TzNotice s={s} date={date} />
       {day.note && (
         <p className="mx-4 mb-2 text-[12.5px] px-3 py-1.5 rounded-md" style={{ background: "var(--warn-bg)", borderLeft: "3px solid var(--warn)" }}>
           <T v={day.note} />
@@ -83,6 +86,7 @@ function SlotRow({ s, date, x, issues, actions }: { s: TripState; date: ISODate;
           </span>
           {x.detail && <span className="block text-[12.5px] text-soft"><T v={x.detail} /></span>}
           {x.who && <span className="block text-[12.5px] text-soft">{t("day.who", { who: x.who })}</span>}
+          <TransportZone s={s} date={date} slot={x} />
         </span>
         <span className="text-soft text-xs pt-1" aria-hidden>{open ? "▴" : "▾"}</span>
       </button>

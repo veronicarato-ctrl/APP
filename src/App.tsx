@@ -7,17 +7,20 @@ import { DayStrip } from "./ui/DayStrip";
 import { BookingEditor, SlotEditor } from "./ui/Editors";
 import { fmtDay } from "./ui/format";
 import { Itinerary } from "./ui/Itinerary";
+import { MapView } from "./ui/MapView";
 import { Practical, type PracticalPage } from "./ui/Practical";
+import { Today } from "./ui/Today";
 import { useTrip } from "./ui/useTrip";
 
 type Tab = "today" | "itinerary" | "map" | "practical" | "assistant";
 const TABS: [Tab, string][] = [["today", "☀"], ["itinerary", "☰"], ["map", "⌖"], ["practical", "▦"], ["assistant", "✦"]];
-const PLACEHOLDER: Partial<Record<Tab, string>> = { today: "today.placeholder", map: "map.placeholder", assistant: "assistant.placeholder" };
+const PLACEHOLDER: Partial<Record<Tab, string>> = { assistant: "assistant.placeholder" };
 
 export default function App() {
   const { t } = useTranslation();
   const { state: s, issues } = useTrip();
-  const [tab, setTab] = useState<Tab>("itinerary");
+  const [tab, setTab] = useState<Tab>("today");
+  const [mapDate, setMapDate] = useState<ISODate>();
   const [page, setPage] = useState<PracticalPage | null>(null);
   const [focus, setFocus] = useState<ISODate>();
   const [slotEd, setSlotEd] = useState<{ date: ISODate; id: string | null } | null>(null);
@@ -50,10 +53,10 @@ export default function App() {
             </button>
             {", "}{t("common.locked", { count: locked })}
           </p>
-          {tab === "itinerary" && (
+          {(tab === "itinerary" || tab === "map") && (
             <div className="mt-2">
-              <DayStrip s={s} issues={issues} selected={focus} onSelect={goToDay} />
-              <p className="text-[11px] mt-1" style={{ color: "var(--on-dark)" }}>{t("day.stripHint")}</p>
+              <DayStrip s={s} issues={issues} selected={tab === "map" ? mapDate : focus} onSelect={tab === "map" ? setMapDate : goToDay} />
+              <p className="text-[11px] mt-1" style={{ color: "var(--on-dark)" }}>{t(tab === "map" ? "day.stripHintMap" : "day.stripHint")}</p>
             </div>
           )}
         </div>
@@ -61,6 +64,8 @@ export default function App() {
 
       <main className="max-w-3xl mx-auto px-4 pt-4">
         {tab === "itinerary" && <Itinerary s={s} issues={issues} focus={focus} actions={{ editSlot: (date, id) => setSlotEd({ date, id }), openBooking: setBookingEd }} />}
+        {tab === "today" && <Today s={s} issues={issues} actions={{ openBooking: setBookingEd, goToDay, openVerification: () => { setTab("practical"); setPage("verification"); } }} />}
+        {tab === "map" && <MapView s={s} date={mapDate} setDate={setMapDate} goToDay={goToDay} />}
         {tab === "practical" && (
           <>
             <Practical s={s} issues={issues} page={page} setPage={setPage}

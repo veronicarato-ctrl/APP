@@ -138,3 +138,26 @@ html,
     }
   }
 }
+
+/* Map stop marker: region colour is set inline from Trip.theme. */
+.stop {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: var(--on-color);
+  font-weight: 700;
+  font-size: 13px;
+  border: 2px solid var(--on-color);
+  box-shadow: 0 1px 4px var(--overlay);
+}
+.stop-sel {
+  outline: 3px solid var(--id-accent);
+}
+.leaflet-container {
+  font: inherit;
+  background: var(--other-bg);
+}
