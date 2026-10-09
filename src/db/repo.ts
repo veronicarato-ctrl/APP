@@ -4,12 +4,26 @@ import { importBrazil } from "../data/importBrazil";
 import { newId } from "../lib/ids";
 import type { Booking, Check, ISODate, Slot, TripState } from "../model/types";
 
+type WriteListener = (tripId: string, d: TravelDB, opts: { baseline?: boolean }) => void | Promise<void>;
+const listeners = new Set<WriteListener>();
+/** Called after every local write (used by the sync layer to stamp changed fields). */
+export const onLocalWrite = (l: WriteListener) => { listeners.add(l); return () => listeners.delete(l); };
+const wrote = async (tripId: string, d: TravelDB, opts: { baseline?: boolean } = {}) => {
+  for (const l of listeners) await l(tripId, d, opts);
+};
+
+let actor = "me";
+/** Name written in the history log for local changes (the signed-in e-mail when there is one). */
+export const setActor = (who: string) => { actor = who; };
+
 const strip = <T extends { tripId: string }>({ tripId: _t, ...rest }: T) => rest;
 const bySort = <T extends { order: number }>(a: T, b: T) => a.order - b.order;
 
 export async function seedIfEmpty(d: TravelDB = db) {
   if ((await d.trips.count()) > 0) return;
-  await saveState(importBrazil(), d);
+  const s = importBrazil();
+  await saveState(s, d);
+  await wrote(s.trip.id, d, { baseline: true });
 }
 
 export async function saveState(s: TripState, d: TravelDB = db) {
@@ -23,6 +37,16 @@ export async function saveState(s: TripState, d: TravelDB = db) {
     await d.checks.bulkPut(s.checks.map((c, order) => ({ ...c, tripId, order })));
     await d.prep.bulkPut(s.prep.map((p, order) => ({ ...p, tripId, order })));
     await d.log.bulkPut(s.log.map((l) => ({ ...l, tripId })));
+  });
+}
+
+const TRIP_TABLES = (d: TravelDB) => [d.places, d.bookings, d.days, d.sources, d.checks, d.prep, d.log];
+
+/** Replaces the whole local copy of a trip (used when merging server changes). */
+export async function replaceTrip(tripId: string, s: TripState, d: TravelDB = db) {
+  await d.transaction("rw", [d.trips, ...TRIP_TABLES(d)], async () => {
+    for (const t of TRIP_TABLES(d)) await t.where({ tripId }).delete();
+    await saveState(s, d);
   });
 }
 
@@ -53,7 +77,7 @@ export async function loadState(tripId: string, d: TravelDB = db): Promise<TripS
 export const firstTripId = async (d: TravelDB = db) => (await d.trips.toCollection().first())?.id;
 
 const logEntry = (d: TravelDB, tripId: string, message: string) =>
-  d.log.add({ id: newId(), tripId, at: new Date().toISOString(), who: "me", message });
+  d.log.add({ id: newId(), tripId, at: new Date().toISOString(), who: actor, message });
 
 /** Saves a slot, optionally moving it to another day (appended at the end of that day). */
 export async function saveSlot(tripId: string, fromDate: ISODate, slot: Slot, toDate: ISODate, d: TravelDB = db) {
@@ -75,6 +99,7 @@ export async function saveSlot(tripId: string, fromDate: ISODate, slot: Slot, to
     const verb = i >= 0 ? "Edited" : "Added";
     await logEntry(d, tripId, `${verb} “${slot.title.text}”${toDate !== fromDate ? ` and moved from ${fromDate} to ${toDate}` : ` on ${fromDate}`}`);
   });
+  await wrote(tripId, d);
 }
 
 export async function deleteSlot(tripId: string, date: ISODate, slotId: string, d: TravelDB = db) {
@@ -86,6 +111,7 @@ export async function deleteSlot(tripId: string, date: ISODate, slotId: string, 
     await d.days.put(day);
     if (x) await logEntry(d, tripId, `Deleted “${x.title.text}” from ${date}`);
   });
+  await wrote(tripId, d);
 }
 
 export async function saveBooking(tripId: string, b: Booking, d: TravelDB = db) {
@@ -97,6 +123,7 @@ export async function saveBooking(tripId: string, b: Booking, d: TravelDB = db) 
       : `Booking “${b.title.text}” updated`;
     await logEntry(d, tripId, msg);
   });
+  await wrote(tripId, d);
 }
 
 export async function toggleCheck(tripId: string, id: string, d: TravelDB = db) {
@@ -106,6 +133,7 @@ export async function toggleCheck(tripId: string, id: string, d: TravelDB = db) 
     await d.checks.put({ ...c, done: !c.done });
     await logEntry(d, tripId, `${c.done ? "Reopened" : "Completed"} task “${c.text.text}”`);
   });
+  await wrote(tripId, d);
 }
 
 export async function addCheck(tripId: string, text: string, d: TravelDB = db) {
@@ -114,12 +142,16 @@ export async function addCheck(tripId: string, text: string, d: TravelDB = db) {
     await d.checks.put({ ...c, tripId, order: await d.checks.where({ tripId }).count() });
     await logEntry(d, tripId, `Added task “${text}”`);
   });
+  await wrote(tripId, d);
 }
 
 export async function resetTrip(tripId: string, d: TravelDB = db) {
-  await d.transaction("rw", [d.trips, d.places, d.bookings, d.days, d.sources, d.checks, d.prep, d.log], async () => {
-    for (const t of [d.places, d.bookings, d.days, d.sources, d.checks, d.prep, d.log]) await t.where({ tripId }).delete();
+  await d.transaction("rw", [d.trips, ...TRIP_TABLES(d)], async () => {
+    for (const t of TRIP_TABLES(d)) await t.where({ tripId }).delete();
     await d.trips.delete(tripId);
   });
-  await seedIfEmpty(d);
+  const s = importBrazil();
+  await saveState(s, d);
+  // A reset is a deliberate change: it is stamped now, so it reaches the other phone too.
+  await wrote(s.trip.id, d);
 }
