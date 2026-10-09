@@ -1,0 +1,1405 @@
+{
+  "seed": {
+    "v": 2,
+    "trip": {
+      "name": "Brasil, praia e Amazónia",
+      "start": "2026-12-14",
+      "end": "2026-12-26",
+      "party": "2 adultos",
+      "origin": "Genebra",
+      "rules": {
+        "maxHeavy": 2,
+        "siesta": false,
+        "checkoutBy": "10:00"
+      }
+    },
+    "places": {
+      "for": {
+        "n": "Fortaleza, aeroporto Pinto Martins",
+        "lat": -3.7788,
+        "lng": -38.5406,
+        "r": "ce"
+      },
+      "mbr": {
+        "n": "Morro Branco",
+        "lat": -4.164,
+        "lng": -38.125,
+        "r": "ce",
+        "ap": 1
+      },
+      "can": {
+        "n": "Canoa Quebrada",
+        "lat": -4.527,
+        "lng": -37.691,
+        "r": "ce",
+        "ap": 1
+      },
+      "jer": {
+        "n": "Jericoacoara",
+        "lat": -2.7974,
+        "lng": -40.5124,
+        "r": "ce"
+      },
+      "mao": {
+        "n": "Manaus, Teatro Amazonas",
+        "lat": -3.1303,
+        "lng": -60.0234,
+        "r": "am"
+      },
+      "enc": {
+        "n": "Encontro das Águas",
+        "lat": -3.1367,
+        "lng": -59.9047,
+        "r": "am"
+      },
+      "tum": {
+        "n": "Tumbira, baixo Rio Negro",
+        "lat": -3.05,
+        "lng": -60.5,
+        "r": "am",
+        "ap": 1
+      },
+      "ana": {
+        "n": "Anavilhanas",
+        "lat": -2.55,
+        "lng": -60.85,
+        "r": "am",
+        "ap": 1
+      },
+      "sjl": {
+        "n": "São Gabriel da Cachoeira",
+        "lat": -0.13,
+        "lng": -67.09,
+        "r": "am",
+        "ap": 1
+      }
+    },
+    "bookings": [
+      {
+        "id": "f1",
+        "k": "voo",
+        "t": "Genebra para Fortaleza",
+        "status": "todo",
+        "ref": "",
+        "tel": "",
+        "addr": "",
+        "ci": "",
+        "co": "",
+        "note": "Via Lisboa. A TAP passa a 9 voos semanais Fortaleza Lisboa a partir de Outubro de 2026.",
+        "date": "2026-12-14",
+        "links": [
+          [
+            "TAP",
+            "https://www.flytap.com"
+          ]
+        ],
+        "src": [
+          "tap"
+        ]
+      },
+      {
+        "id": "h1",
+        "k": "hotel",
+        "t": "Hotel em Fortaleza, a escolher",
+        "status": "todo",
+        "ref": "",
+        "tel": "",
+        "addr": "",
+        "ci": "",
+        "co": "",
+        "note": "",
+        "from": "2026-12-14",
+        "to": "2026-12-15",
+        "p": "for"
+      },
+      {
+        "id": "t1",
+        "k": "transfer",
+        "t": "Fortaleza para Canoa Quebrada",
+        "status": "todo",
+        "ref": "",
+        "tel": "",
+        "addr": "",
+        "ci": "",
+        "co": "",
+        "note": "Cerca de 160 km, duas a três horas.",
+        "date": "2026-12-15"
+      },
+      {
+        "id": "h2",
+        "k": "hotel",
+        "t": "Pousada em Canoa Quebrada, a escolher",
+        "status": "todo",
+        "ref": "",
+        "tel": "",
+        "addr": "",
+        "ci": "",
+        "co": "",
+        "note": "",
+        "from": "2026-12-15",
+        "to": "2026-12-17",
+        "p": "can"
+      },
+      {
+        "id": "t2",
+        "k": "transfer",
+        "t": "Canoa Quebrada para Jericoacoara",
+        "status": "todo",
+        "ref": "",
+        "tel": "",
+        "addr": "",
+        "ci": "",
+        "co": "",
+        "note": "Canoa fica a cerca de 165 km a leste de Fortaleza e Jeri a cerca de 300 km a oeste, último troço em 4x4. Transfer 4x4 Fortaleza Jeri de 5 a 6 h, partilhado cerca de R$ 200 por pessoa, privado cerca de R$ 750.",
+        "date": "2026-12-17",
+        "src": [
+          "cq3",
+          "jch"
+        ]
+      },
+      {
+        "id": "h3",
+        "k": "hotel",
+        "t": "Pousada em Jericoacoara, a escolher",
+        "status": "todo",
+        "ref": "",
+        "tel": "",
+        "addr": "",
+        "ci": "",
+        "co": "",
+        "note": "",
+        "from": "2026-12-17",
+        "to": "2026-12-20",
+        "p": "jer"
+      },
+      {
+        "id": "f2",
+        "k": "voo",
+        "t": "Jericoacoara para Fortaleza",
+        "status": "todo",
+        "ref": "",
+        "tel": "",
+        "addr": "",
+        "ci": "",
+        "co": "",
+        "note": "Em Set 2026 o aeroporto de Jericoacoara só tinha rotas para Guarulhos (Latam, Gol) e Confins (Azul). Sem voo regular conhecido para Fortaleza.",
+        "date": "2026-12-20",
+        "noRoute": 1,
+        "src": [
+          "jjd"
+        ]
+      },
+      {
+        "id": "f3",
+        "k": "voo",
+        "t": "Fortaleza para Manaus",
+        "status": "todo",
+        "ref": "",
+        "tel": "",
+        "addr": "",
+        "ci": "",
+        "co": "",
+        "note": "Gol, só ao sábado, 18h30 a 21h (hora local de Manaus).",
+        "date": "2026-12-20",
+        "days": [
+          6
+        ],
+        "links": [
+          [
+            "Gol",
+            "https://www.voegol.com.br"
+          ]
+        ],
+        "src": [
+          "gol"
+        ]
+      },
+      {
+        "id": "h4",
+        "k": "hotel",
+        "t": "Hotel em Manaus, a escolher",
+        "status": "todo",
+        "ref": "",
+        "tel": "",
+        "addr": "",
+        "ci": "",
+        "co": "",
+        "note": "",
+        "from": "2026-12-20",
+        "to": "2026-12-21",
+        "p": "mao"
+      },
+      {
+        "id": "p3",
+        "k": "contacto",
+        "t": "Poranduba Amazônia, roteiro do baixo Rio Negro",
+        "status": "urgent",
+        "ref": "",
+        "tel": "",
+        "addr": "",
+        "ci": "",
+        "co": "",
+        "note": "Operadora de base comunitária fundada no Tumbira."
+      },
+      {
+        "id": "h5",
+        "k": "hotel",
+        "t": "Pousada comunitária, baixo Rio Negro",
+        "status": "todo",
+        "ref": "",
+        "tel": "",
+        "addr": "",
+        "ci": "",
+        "co": "",
+        "note": "",
+        "from": "2026-12-21",
+        "to": "2026-12-23",
+        "p": "tum"
+      },
+      {
+        "id": "f4",
+        "k": "voo",
+        "t": "Manaus para São Gabriel da Cachoeira",
+        "status": "urgent",
+        "ref": "",
+        "tel": "",
+        "addr": "",
+        "ci": "",
+        "co": "",
+        "note": "Tarifas vistas a partir de cerca de R$ 930 por trajecto. O site da Azul mostra tarifas para 19 e 26 Dez.",
+        "date": "2026-12-23",
+        "warn": "Cerca de 3 voos por semana, dias de Dezembro por confirmar",
+        "links": [
+          [
+            "Azul",
+            "https://www.voeazul.com.br"
+          ]
+        ],
+        "src": [
+          "sky",
+          "azul"
+        ]
+      },
+      {
+        "id": "h6",
+        "k": "hotel",
+        "t": "Alojamento em São Gabriel da Cachoeira",
+        "status": "todo",
+        "ref": "",
+        "tel": "",
+        "addr": "",
+        "ci": "",
+        "co": "",
+        "note": "",
+        "from": "2026-12-23",
+        "to": "2026-12-25",
+        "p": "sjl"
+      },
+      {
+        "id": "p1",
+        "k": "autorização",
+        "t": "Autorização FUNAI, aldeias do alto Rio Negro",
+        "status": "urgent",
+        "ref": "",
+        "tel": "",
+        "addr": "",
+        "ci": "",
+        "co": "",
+        "note": "Turismo em terra indígena só através de comunidades com Plano de Visitação aprovado (IN 03/2015). Documento com foto e autorização individual de ingresso.",
+        "links": [
+          [
+            "FUNAI",
+            "https://www.gov.br/funai"
+          ]
+        ],
+        "src": [
+          "in3",
+          "icm"
+        ]
+      },
+      {
+        "id": "p2",
+        "k": "contacto",
+        "t": "FOIRN, São Gabriel da Cachoeira",
+        "status": "urgent",
+        "ref": "",
+        "tel": "",
+        "addr": "",
+        "ci": "",
+        "co": "",
+        "note": "",
+        "links": [
+          [
+            "FOIRN",
+            "https://foirn.org.br"
+          ]
+        ]
+      },
+      {
+        "id": "f5",
+        "k": "voo",
+        "t": "São Gabriel da Cachoeira para Manaus",
+        "status": "urgent",
+        "ref": "",
+        "tel": "",
+        "addr": "",
+        "ci": "",
+        "co": "",
+        "note": "",
+        "date": "2026-12-25",
+        "warn": "Cerca de 3 voos por semana, dias de Dezembro por confirmar",
+        "links": [
+          [
+            "Azul",
+            "https://www.voeazul.com.br"
+          ]
+        ],
+        "src": [
+          "sky",
+          "azul"
+        ]
+      },
+      {
+        "id": "h7",
+        "k": "hotel",
+        "t": "Hotel em Manaus, a escolher",
+        "status": "todo",
+        "ref": "",
+        "tel": "",
+        "addr": "",
+        "ci": "",
+        "co": "",
+        "note": "",
+        "from": "2026-12-25",
+        "to": "2026-12-26",
+        "p": "mao"
+      },
+      {
+        "id": "f6",
+        "k": "voo",
+        "t": "Manaus para Genebra",
+        "status": "todo",
+        "ref": "",
+        "tel": "",
+        "addr": "",
+        "ci": "",
+        "co": "",
+        "note": "Via Lisboa (sugestão, por confirmar).",
+        "date": "2026-12-26",
+        "links": [
+          [
+            "TAP",
+            "https://www.flytap.com"
+          ]
+        ],
+        "warn": "Frequência Manaus Lisboa por confirmar"
+      },
+      {
+        "id": "p4",
+        "k": "contacto",
+        "t": "Via ritual, tradição reconhecida (opcional)",
+        "status": "todo",
+        "ref": "",
+        "tel": "",
+        "addr": "",
+        "ci": "",
+        "co": "",
+        "note": "Santo Daime, União do Vegetal ou comunidade anfitriã. Triagem prévia da medicação obrigatória."
+      },
+      {
+        "id": "x1",
+        "k": "taxa",
+        "t": "Taxa de Turismo Sustentável, Jericoacoara",
+        "status": "todo",
+        "ref": "",
+        "tel": "",
+        "addr": "",
+        "ci": "",
+        "co": "",
+        "note": "R$ 41,50 por pessoa, válida até 10 dias. Pagar online antes no portal da Prefeitura de Jijoca.",
+        "date": "2026-12-17",
+        "src": [
+          "tts"
+        ]
+      }
+    ],
+    "days": {
+      "2026-12-14": {
+        "note": "Dia de chegada, programa mínimo.",
+        "slots": [
+          {
+            "id": "s1",
+            "ty": "x",
+            "t": "Chegada a Fortaleza",
+            "d": "Horário do voo por definir",
+            "st": "",
+            "en": "",
+            "p": "for",
+            "b": "f1",
+            "h": 1,
+            "who": "",
+            "tips": [
+              "Ter reais em dinheiro e cartão à mão para o primeiro transporte"
+            ]
+          },
+          {
+            "id": "s2",
+            "ty": "l",
+            "t": "Check-in em Fortaleza",
+            "d": "Malas depositadas logo à chegada",
+            "st": "",
+            "en": "",
+            "p": "for",
+            "b": "h1",
+            "h": 0,
+            "who": ""
+          },
+          {
+            "id": "s3",
+            "ty": "f",
+            "t": "Jantar leve perto do hotel",
+            "d": "",
+            "st": "",
+            "en": "",
+            "p": "for",
+            "b": "",
+            "h": 0,
+            "who": ""
+          }
+        ]
+      },
+      "2026-12-15": {
+        "note": "",
+        "slots": [
+          {
+            "id": "s4",
+            "ty": "l",
+            "t": "Check-out em Fortaleza",
+            "d": "",
+            "st": "08:30",
+            "en": "",
+            "p": "for",
+            "b": "h1",
+            "h": 0,
+            "who": ""
+          },
+          {
+            "id": "s5",
+            "ty": "x",
+            "t": "Transfer para Canoa Quebrada",
+            "d": "Paragem nas areias coloridas de Morro Branco",
+            "st": "09:00",
+            "en": "13:00",
+            "p": "mbr",
+            "b": "t1",
+            "h": 1,
+            "who": "",
+            "desc": "Cerca de 165 km, perto de três horas de estrada.",
+            "src": [
+              "cq3"
+            ]
+          },
+          {
+            "id": "s6",
+            "ty": "l",
+            "t": "Check-in em Canoa Quebrada",
+            "d": "",
+            "st": "13:00",
+            "en": "",
+            "p": "can",
+            "b": "h2",
+            "h": 0,
+            "who": ""
+          },
+          {
+            "id": "s7",
+            "ty": "f",
+            "t": "Jantar na Broadway",
+            "d": "Rua principal da antiga vila de pescadores",
+            "st": "19:30",
+            "en": "",
+            "p": "can",
+            "b": "",
+            "h": 0,
+            "who": "",
+            "desc": "A Broadway é a Rua Dragão do Mar, com bares, restaurantes e forró ao vivo.",
+            "src": [
+              "cq4"
+            ]
+          }
+        ]
+      },
+      "2026-12-16": {
+        "note": "",
+        "slots": [
+          {
+            "id": "s8",
+            "ty": "n",
+            "t": "Buggy pelas falésias e lagoa do Oásis",
+            "d": "Falésias avermelhadas, símbolo da lua e estrela",
+            "st": "09:00",
+            "en": "13:00",
+            "p": "can",
+            "b": "",
+            "h": 1,
+            "who": "",
+            "desc": "Bugueiros credenciados pela Prefeitura de Aracati, passeios das 8h às 17h, cinco paragens para fotos incluindo o símbolo nas falésias.",
+            "price": "R$ 300 por buggy, até 4 pessoas (valor publicado, a confirmar)",
+            "tips": [
+              "Oásis da Lagoa do Skibunda, descida das dunas sentado numa prancha",
+              "Alternativa, Rota das Falésias até Ponta Grossa, cerca de 2h30"
+            ],
+            "src": [
+              "cq1",
+              "cq3",
+              "cq2"
+            ]
+          },
+          {
+            "id": "s9",
+            "ty": "w",
+            "t": "Descanso",
+            "d": "",
+            "st": "13:30",
+            "en": "16:00",
+            "p": "can",
+            "b": "",
+            "h": 0,
+            "who": ""
+          },
+          {
+            "id": "s10",
+            "ty": "n",
+            "t": "Pôr do sol nas falésias",
+            "d": "",
+            "st": "17:00",
+            "en": "18:00",
+            "p": "can",
+            "b": "",
+            "h": 0,
+            "who": ""
+          }
+        ]
+      },
+      "2026-12-17": {
+        "note": "Dia de estrada muito longo, de um lado ao outro de Fortaleza.",
+        "slots": [
+          {
+            "id": "s11",
+            "ty": "l",
+            "t": "Check-out em Canoa Quebrada",
+            "d": "",
+            "st": "07:30",
+            "en": "",
+            "p": "can",
+            "b": "h2",
+            "h": 0,
+            "who": ""
+          },
+          {
+            "id": "s12",
+            "ty": "x",
+            "t": "Transfer para Jericoacoara",
+            "d": "Duração por confirmar",
+            "st": "08:00",
+            "en": "",
+            "p": "jer",
+            "b": "t2",
+            "h": 1,
+            "who": "",
+            "desc": "Mais de 450 km somando as duas distâncias a Fortaleza, último troço obrigatório em 4x4. Pode ultrapassar oito horas.",
+            "tips": [
+              "Pagar a Taxa de Turismo Sustentável antes de chegar",
+              "Confirmar se o transfer faz o percurso inteiro ou exige troca em Fortaleza"
+            ],
+            "src": [
+              "cq3",
+              "jch",
+              "tts"
+            ]
+          },
+          {
+            "id": "s13",
+            "ty": "l",
+            "t": "Check-in em Jericoacoara",
+            "d": "",
+            "st": "",
+            "en": "",
+            "p": "jer",
+            "b": "h3",
+            "h": 0,
+            "who": ""
+          },
+          {
+            "id": "s14",
+            "ty": "n",
+            "t": "Pôr do sol na Duna",
+            "d": "",
+            "st": "",
+            "en": "",
+            "p": "jer",
+            "b": "",
+            "h": 0,
+            "who": ""
+          }
+        ]
+      },
+      "2026-12-18": {
+        "note": "",
+        "slots": [
+          {
+            "id": "s15",
+            "ty": "n",
+            "t": "Litoral leste, Lagoa do Paraíso e Lagoa Azul",
+            "d": "Lagoas permanentes alimentadas pelo lençol freático",
+            "st": "09:00",
+            "en": "14:00",
+            "p": "jer",
+            "b": "",
+            "h": 1,
+            "who": "",
+            "desc": "Passeio Lado Leste, Árvore da Preguiça, Buraco Azul ou Lagun, Lagoa Azul e Lagoa do Paraíso. Duração de 5 a 6 horas.",
+            "price": "Entrada no Club Lagoa Azul R$ 40, no Alchymist R$ 35. Extremo Leste R$ 500 por veículo",
+            "tips": [
+              "Escolher entre Buraco Azul e Lagun, e entre Lagoa Azul e Paraíso, para não repetir"
+            ],
+            "src": [
+              "jfz",
+              "jbg"
+            ]
+          },
+          {
+            "id": "s16",
+            "ty": "w",
+            "t": "Descanso",
+            "d": "",
+            "st": "14:30",
+            "en": "17:00",
+            "p": "jer",
+            "b": "",
+            "h": 0,
+            "who": ""
+          },
+          {
+            "id": "s17",
+            "ty": "f",
+            "t": "Jantar na vila",
+            "d": "",
+            "st": "19:30",
+            "en": "",
+            "p": "jer",
+            "b": "",
+            "h": 0,
+            "who": ""
+          }
+        ]
+      },
+      "2026-12-19": {
+        "note": "",
+        "slots": [
+          {
+            "id": "s18",
+            "ty": "n",
+            "t": "Pedra Furada",
+            "d": "Caminhada pela praia",
+            "st": "08:30",
+            "en": "11:30",
+            "p": "jer",
+            "b": "",
+            "h": 1,
+            "who": "",
+            "desc": "Pela praia só com maré baixa. Pelo Morro do Serrote, pouco mais de meia hora a pé, com descida e subida. A luz é melhor de manhã.",
+            "tips": [
+              "Consultar a tábua das marés para 19 Dez",
+              "A maré baixa matinal coincide com lua cheia ou nova"
+            ],
+            "src": [
+              "jfz"
+            ]
+          },
+          {
+            "id": "s19",
+            "ty": "n",
+            "t": "Kitesurf (opcional)",
+            "d": "Fora da época alta do kite",
+            "st": "14:00",
+            "en": "17:00",
+            "p": "jer",
+            "b": "",
+            "h": 0,
+            "who": "",
+            "desc": "A época alta do kite em Jeri é de Julho a Novembro. Dezembro fica fora do pico.",
+            "src": [
+              "md"
+            ]
+          },
+          {
+            "id": "s20",
+            "ty": "n",
+            "t": "Último pôr do sol na Duna",
+            "d": "",
+            "st": "",
+            "en": "",
+            "p": "jer",
+            "b": "",
+            "h": 0,
+            "who": ""
+          }
+        ]
+      },
+      "2026-12-20": {
+        "note": "Transição Ceará para Amazónia. Os dois voos previstos não existem neste dia segundo as fontes, ver opções na verificação.",
+        "slots": [
+          {
+            "id": "s21",
+            "ty": "l",
+            "t": "Check-out em Jericoacoara",
+            "d": "",
+            "st": "",
+            "en": "",
+            "p": "jer",
+            "b": "h3",
+            "h": 0,
+            "who": ""
+          },
+          {
+            "id": "s22",
+            "ty": "x",
+            "t": "Voo Jericoacoara para Fortaleza",
+            "d": "",
+            "st": "",
+            "en": "",
+            "p": "for",
+            "b": "f2",
+            "h": 1,
+            "who": "",
+            "tips": [
+              "Sem voo regular conhecido, ver opções na verificação"
+            ],
+            "src": [
+              "jjd"
+            ]
+          },
+          {
+            "id": "s23",
+            "ty": "x",
+            "t": "Voo Fortaleza para Manaus",
+            "d": "Cerca de 3h25",
+            "st": "",
+            "en": "",
+            "p": "mao",
+            "b": "f3",
+            "h": 1,
+            "who": "",
+            "tips": [
+              "A Gol só voa Fortaleza Manaus ao sábado, e 20 Dez é domingo"
+            ],
+            "src": [
+              "gol"
+            ]
+          },
+          {
+            "id": "s24",
+            "ty": "l",
+            "t": "Check-in em Manaus",
+            "d": "",
+            "st": "",
+            "en": "",
+            "p": "mao",
+            "b": "h4",
+            "h": 0,
+            "who": ""
+          },
+          {
+            "id": "s25",
+            "ty": "c",
+            "t": "Meio dia de cidade, Teatro Amazonas",
+            "d": "Se o horário do voo o permitir, e briefing da semana",
+            "st": "",
+            "en": "",
+            "p": "mao",
+            "b": "",
+            "h": 0,
+            "who": "",
+            "desc": "Visitas guiadas de terça a domingo, na lista do Património Mundial da Unesco desde 2026.",
+            "price": "R$ 20 inteira para visitantes de fora do Amazonas",
+            "src": [
+              "ta",
+              "une"
+            ]
+          }
+        ]
+      },
+      "2026-12-21": {
+        "note": "",
+        "slots": [
+          {
+            "id": "s26",
+            "ty": "l",
+            "t": "Check-out em Manaus",
+            "d": "",
+            "st": "08:00",
+            "en": "",
+            "p": "mao",
+            "b": "h4",
+            "h": 0,
+            "who": ""
+          },
+          {
+            "id": "s27",
+            "ty": "x",
+            "t": "Barco para a comunidade",
+            "d": "Hora e meia a duas horas de Manaus",
+            "st": "08:30",
+            "en": "10:30",
+            "p": "tum",
+            "b": "",
+            "h": 1,
+            "who": ""
+          },
+          {
+            "id": "s28",
+            "ty": "l",
+            "t": "Check-in na pousada comunitária",
+            "d": "",
+            "st": "10:30",
+            "en": "",
+            "p": "tum",
+            "b": "h5",
+            "h": 0,
+            "who": ""
+          },
+          {
+            "id": "s29",
+            "ty": "n",
+            "t": "Canoagem nos igarapés ao fim da tarde",
+            "d": "Mata alagada de Dezembro",
+            "st": "16:30",
+            "en": "18:00",
+            "p": "tum",
+            "b": "",
+            "h": 0,
+            "who": ""
+          },
+          {
+            "id": "s30",
+            "ty": "n",
+            "t": "Focagem nocturna de jacarés",
+            "d": "",
+            "st": "20:00",
+            "en": "21:30",
+            "p": "tum",
+            "b": "",
+            "h": 1,
+            "who": ""
+          }
+        ]
+      },
+      "2026-12-22": {
+        "note": "",
+        "slots": [
+          {
+            "id": "s31",
+            "ty": "n",
+            "t": "Anavilhanas e aldeia Tatuyo",
+            "d": "Arquipélago fluvial, roda de conversa e pintura",
+            "st": "08:00",
+            "en": "14:00",
+            "p": "ana",
+            "b": "",
+            "h": 1,
+            "who": ""
+          },
+          {
+            "id": "s32",
+            "ty": "n",
+            "t": "Trilha com um morador",
+            "d": "Plantas medicinais e repelentes naturais",
+            "st": "16:00",
+            "en": "17:30",
+            "p": "tum",
+            "b": "",
+            "h": 0,
+            "who": ""
+          },
+          {
+            "id": "s33",
+            "ty": "f",
+            "t": "Jantar na comunidade",
+            "d": "",
+            "st": "19:00",
+            "en": "",
+            "p": "tum",
+            "b": "",
+            "h": 0,
+            "who": ""
+          }
+        ]
+      },
+      "2026-12-23": {
+        "note": "Aldeias a seis a doze horas de voadeira não são alcançáveis no dia do voo. O primeiro contacto fica em São Gabriel.",
+        "slots": [
+          {
+            "id": "s34",
+            "ty": "l",
+            "t": "Check-out da pousada comunitária",
+            "d": "",
+            "st": "06:30",
+            "en": "",
+            "p": "tum",
+            "b": "h5",
+            "h": 0,
+            "who": ""
+          },
+          {
+            "id": "s35",
+            "ty": "x",
+            "t": "Barco de regresso a Manaus",
+            "d": "",
+            "st": "07:00",
+            "en": "09:00",
+            "p": "mao",
+            "b": "",
+            "h": 1,
+            "who": ""
+          },
+          {
+            "id": "s36",
+            "ty": "x",
+            "t": "Voo Manaus para São Gabriel da Cachoeira",
+            "d": "Dia dependente das frequências da Azul",
+            "st": "",
+            "en": "",
+            "p": "sjl",
+            "b": "f4",
+            "h": 1,
+            "who": "",
+            "desc": "Cerca de três voos por semana em Janeiro de 2026. Os dias de Dezembro têm de ser confirmados antes de fixar a semana.",
+            "src": [
+              "sky",
+              "azul"
+            ]
+          },
+          {
+            "id": "s37",
+            "ty": "l",
+            "t": "Check-in em São Gabriel",
+            "d": "",
+            "st": "",
+            "en": "",
+            "p": "sjl",
+            "b": "h6",
+            "h": 0,
+            "who": ""
+          },
+          {
+            "id": "s38",
+            "ty": "c",
+            "t": "Encontro com a FOIRN",
+            "d": "",
+            "st": "",
+            "en": "",
+            "p": "sjl",
+            "b": "p2",
+            "h": 0,
+            "who": ""
+          }
+        ]
+      },
+      "2026-12-24": {
+        "note": "O alojamento em São Gabriel nas noites de 23 e 24 só é compatível com aldeias próximas da cidade. Aldeias distantes exigem pernoita na aldeia, decisão a tomar com a FOIRN.",
+        "slots": [
+          {
+            "id": "s39",
+            "ty": "c",
+            "t": "Vivência em aldeia",
+            "d": "Acesso mediado pela FOIRN e autorizado pela FUNAI",
+            "st": "",
+            "en": "",
+            "p": "sjl",
+            "b": "p1",
+            "h": 1,
+            "who": "",
+            "tips": [
+              "Perguntar à FOIRN que comunidades têm Plano de Visitação aprovado",
+              "Não fotografar nem divulgar imagens sem autorização da comunidade"
+            ],
+            "src": [
+              "in3",
+              "icm"
+            ]
+          },
+          {
+            "id": "s40",
+            "ty": "r",
+            "t": "Cerimónia por via séria (opcional)",
+            "d": "Só por tradição reconhecida, após triagem de saúde",
+            "st": "",
+            "en": "",
+            "p": "sjl",
+            "b": "p4",
+            "h": 1,
+            "who": ""
+          }
+        ]
+      },
+      "2026-12-25": {
+        "note": "",
+        "slots": [
+          {
+            "id": "s41",
+            "ty": "l",
+            "t": "Check-out em São Gabriel",
+            "d": "",
+            "st": "",
+            "en": "",
+            "p": "sjl",
+            "b": "h6",
+            "h": 0,
+            "who": ""
+          },
+          {
+            "id": "s42",
+            "ty": "x",
+            "t": "Voo São Gabriel para Manaus",
+            "d": "",
+            "st": "",
+            "en": "",
+            "p": "mao",
+            "b": "f5",
+            "h": 1,
+            "who": ""
+          },
+          {
+            "id": "s43",
+            "ty": "l",
+            "t": "Check-in em Manaus",
+            "d": "",
+            "st": "",
+            "en": "",
+            "p": "mao",
+            "b": "h7",
+            "h": 0,
+            "who": ""
+          }
+        ]
+      },
+      "2026-12-26": {
+        "note": "",
+        "slots": [
+          {
+            "id": "s44",
+            "ty": "l",
+            "t": "Check-out em Manaus",
+            "d": "",
+            "st": "",
+            "en": "",
+            "p": "mao",
+            "b": "h7",
+            "h": 0,
+            "who": ""
+          },
+          {
+            "id": "s45",
+            "ty": "n",
+            "t": "Encontro das Águas (opcional)",
+            "d": "Só se o voo de regresso for ao fim do dia",
+            "st": "",
+            "en": "",
+            "p": "enc",
+            "b": "",
+            "h": 0,
+            "who": ""
+          },
+          {
+            "id": "s46",
+            "ty": "x",
+            "t": "Voo Manaus para Genebra",
+            "d": "Via Lisboa, por confirmar",
+            "st": "",
+            "en": "",
+            "p": "mao",
+            "b": "f6",
+            "h": 1,
+            "who": ""
+          }
+        ]
+      }
+    },
+    "checks": [
+      {
+        "id": "c1",
+        "t": "Confirmar dias de voo Manaus São Gabriel antes de fixar o resto da semana",
+        "done": false
+      },
+      {
+        "id": "c2",
+        "t": "Triagem médica e revisão da medicação antes de qualquer cerimónia",
+        "done": false
+      },
+      {
+        "id": "c3",
+        "t": "Escolher alojamentos por faixa de conforto (misto)",
+        "done": false
+      },
+      {
+        "id": "c4",
+        "t": "Consulta de medicina de viagem, febre amarela e prevenção da malária para o Amazonas",
+        "done": false
+      },
+      {
+        "id": "c5",
+        "t": "Seguro com repatriamento e evacuação médica",
+        "done": false
+      },
+      {
+        "id": "c6",
+        "t": "Carregadores bivolt e adaptador tipo N",
+        "done": false
+      },
+      {
+        "id": "c7",
+        "t": "Mapas offline e guião descarregados antes da Amazónia",
+        "done": false
+      }
+    ],
+    "log": []
+  },
+  "sources": {
+    "cdc": [
+      "CDC Yellow Book 2024, Brasil",
+      "https://wwwnc.cdc.gov/travel/yellowbook/2024/preparing/yellow-fever-vaccine-malaria-prevention-by-country/brazil"
+    ],
+    "cdc18": [
+      "CDC Yellow Book 2018, Brasil",
+      "https://relief.unboundmedicine.com/relief/pview/cdc-yellow-book/204522/all/Brazil"
+    ],
+    "cdc10": [
+      "Alerta CDC febre amarela (U. Toledo)",
+      "https://wordpress.utoledo.edu/disastermedicine/?p=8720"
+    ],
+    "ptvisa": [
+      "Decreto 43/2003, isenção de vistos PT BR",
+      "https://diariodarepublica.pt/dr/detalhe/decreto/43-2003-494051"
+    ],
+    "volt": [
+      "Esse Mundo É Nosso, voltagem por cidade",
+      "https://www.essemundoenosso.com.br/qual-a-voltagem-nas-cidades-do-brasil-antes-de-viajar/"
+    ],
+    "plug": [
+      "Engenharia 360, tomadas no mundo",
+      "https://engenharia360.com/guia-sobre-tomadas-e-voltagens-no-mundo/"
+    ],
+    "jcl": [
+      "Climatempo, climatologia Jericoacoara",
+      "https://www.climatempo.com.br/climatologia/5020/jericoacoara-ce"
+    ],
+    "mcl": [
+      "Climatempo, climatologia Manaus",
+      "https://www.climatempo.com.br/climatologia/25/manaus-am"
+    ],
+    "md": [
+      "Melhores Destinos, quando ir a Jeri",
+      "https://guia.melhoresdestinos.com.br/quando-ir-jericoacoara-melhor-epoca.html"
+    ],
+    "tts": [
+      "Diário do Turismo, taxa Jeri 2026",
+      "https://diariodoturismo.com.br/taxa-de-turismo-jericoacoara-2026-veja-valor-atualizado-e-quem-precisa-pagar/"
+    ],
+    "jch": [
+      "BlaBlaCar, como chegar a Jeri (Jun 2026)",
+      "https://blog.blablacar.com.br/dicas/como-chegar-em-jericoacoara-2"
+    ],
+    "jjd": [
+      "O Povo, aeroporto de Jericoacoara (Set 2026)",
+      "https://mais.opovo.com.br/jornal/economia/2026/09/03/internacionalizacao-do-aeroporto-de-jericoacoara-fica-para-depois-das-obras-de-ate-tres-anos.html"
+    ],
+    "gol": [
+      "Gol, voo Fortaleza Manaus (Mai 2026)",
+      "https://www.voegol.com.br/sobre-a-gol/imprensa/gol-fortalece-a-conectividade-norte-nordeste-com-retomada-de-voos-diretos-entre-manaus-e-fortaleza"
+    ],
+    "azul": [
+      "Azul, tarifas São Gabriel",
+      "https://passagens.voeazul.com.br/pt/voos-de-são-gabriel-da-cachoeira"
+    ],
+    "sky": [
+      "Skyscanner, Manaus São Gabriel",
+      "https://www.espanol.skyscanner.com/rutas/mao/sjl/manaos-a-sao-gabriel.html"
+    ],
+    "tap": [
+      "O Povo, TAP Fortaleza Lisboa (Mar 2026)",
+      "https://www.opovo.com.br/noticias/economia/2026/03/05/rotas-de-fortaleza-para-paris-e-lisboa-vao-ganhar-mais-voos.html"
+    ],
+    "cq1": [
+      "Diário do Nordeste, Canoa Quebrada",
+      "https://diariodonordeste.verdesmares.com.br/estilo-de-vida/viagem/canoa-quebrada-onde-fica-como-chegar-e-o-que-fazer-1.3523323"
+    ],
+    "cq2": [
+      "Viagens e Caminhos, Canoa Quebrada",
+      "https://www.viagensecaminhos.com/canoa-quebrada-ce/"
+    ],
+    "cq3": [
+      "Seguro Viagem, guia Canoa Quebrada",
+      "https://www.seguroviagem.srv.br/blog/canoa-quebrada/"
+    ],
+    "cq4": [
+      "Quanto Custa Viajar, Canoa Quebrada",
+      "https://quantocustaviajar.com/blog/canoa-quebrada"
+    ],
+    "jfz": [
+      "Viaje na Viagem, o que fazer em Jeri",
+      "https://viajenaviagem.com/destino/jericoacoara/o-que-fazer"
+    ],
+    "jbg": [
+      "Mala de Aventuras, buggy em Jeri",
+      "https://maladeaventuras.com/passeio-de-bugre-em-jericoacoara-tatajuba/"
+    ],
+    "ta": [
+      "Portal Amazônia, visitas ao Teatro",
+      "https://portalamazonia.com/cultura/visitas-teatro-amazonas/"
+    ],
+    "une": [
+      "Mercado & Eventos, Teatro Amazonas Unesco",
+      "https://www.mercadoeeventos.com.br/?p=719073"
+    ],
+    "in3": [
+      "Caderno Virtual de Turismo, IN 03/2015 FUNAI",
+      "https://www.redalyc.org/journal/1154/115474121006/115474121006.pdf"
+    ],
+    "icm": [
+      "ICMBio, regras de ingresso em TI",
+      "https://www.gov.br/icmbio/pt-br/acesso-a-informacao/editais-diversos/editais-diversos-2023/anexo-iii-edital-de-credenciamento-pico-da-neblina.pdf"
+    ]
+  },
+  "prep": [
+    [
+      "Clima em Dezembro",
+      [
+        [
+          "Jericoacoara, mínima 26 °C, máxima 29 °C, cerca de 31 mm de chuva no mês (média de 30 anos).",
+          [
+            "jcl"
+          ]
+        ],
+        [
+          "Manaus, mínima 24 °C, máxima 30 °C, cerca de 295 mm de chuva, início da estação chuvosa. Contar com aguaceiros quase diários.",
+          [
+            "mcl"
+          ]
+        ],
+        [
+          "Desde meados de Dezembro até ao Carnaval a vila de Jeri enche de turistas brasileiros, reservar cedo.",
+          [
+            "md"
+          ]
+        ]
+      ]
+    ],
+    [
+      "Saúde",
+      [
+        [
+          "Vacina da febre amarela recomendada pelo CDC para todo o estado do Amazonas, a partir dos 9 meses de idade.",
+          [
+            "cdc"
+          ]
+        ],
+        [
+          "Não recomendada para itinerários limitados a Fortaleza (edição 2018), o que muda com a parte amazónica.",
+          [
+            "cdc18"
+          ]
+        ],
+        [
+          "Vacinar pelo menos 10 dias antes da viagem.",
+          [
+            "cdc10"
+          ]
+        ],
+        [
+          "Malária com transmissão em todo o Amazonas, quimioprofilaxia indicada pelo CDC para esse estado. Decidir em consulta de medicina de viagem.",
+          [
+            "cdc",
+            "cdc18"
+          ]
+        ],
+        [
+          "Via ritual, revisão obrigatória da medicação com o médico antes de partir.",
+          []
+        ]
+      ]
+    ],
+    [
+      "Documentos e autorizações",
+      [
+        [
+          "Cidadãos portugueses estão isentos de visto até 90 dias para turismo. Outras nacionalidades, confirmar no consulado do Brasil.",
+          [
+            "ptvisa"
+          ]
+        ],
+        [
+          "Taxa de Turismo Sustentável de Jeri, R$ 41,50 por pessoa até 10 dias, paga online antes.",
+          [
+            "tts"
+          ]
+        ],
+        [
+          "Terras indígenas, visita turística só com Plano de Visitação aprovado, documento com foto e autorização individual.",
+          [
+            "in3",
+            "icm"
+          ]
+        ]
+      ]
+    ],
+    [
+      "Electricidade",
+      [
+        [
+          "Ceará em 220 V (Fortaleza, Jeri, Canoa), Amazonas em 127 V (Manaus).",
+          [
+            "volt"
+          ]
+        ],
+        [
+          "Tomada brasileira tipo N, norma NBR 14136. Na Suíça usam-se os tipos C e J.",
+          [
+            "plug"
+          ]
+        ],
+        [
+          "Verificar que todos os carregadores aceitam 100 a 240 V.",
+          []
+        ]
+      ]
+    ],
+    [
+      "Dinheiro e rede",
+      [
+        [
+          "Levar reais em dinheiro para comunidades e aldeias, perguntar à Poranduba e à FOIRN que meios de pagamento aceitam.",
+          []
+        ],
+        [
+          "Contar com rede limitada ou nula no rio e nas aldeias. Descarregar mapas offline e exportar o guião antes de 21 Dez.",
+          []
+        ]
+      ]
+    ],
+    [
+      "Equipamento",
+      [
+        [
+          "Selva, repelente, roupa comprida leve, capa de chuva, sacos estanques, lanterna frontal, calçado que possa molhar.",
+          []
+        ],
+        [
+          "Praia e dunas, chapéu, protector solar, óculos, sandálias para ruas de areia.",
+          []
+        ]
+      ]
+    ]
+  ],
+  "prepNote": "Informação factual com fonte indicada. Linhas sem fonte são recomendações de preparação."
+}

@@ -1,6 +1,6 @@
 # Prompt pour Claude Code, application « Guião de viagem » (version 2)
 
-Mode d'emploi. Le dépôt contient ce fichier (`SPEC.md`) et les prototypes de référence du voyage au Brésil, `bresil-2026.jsx` (guide statique en six onglets) et le document « guião Brasil » (à déposer). Ouvrir Claude Code dans ce dossier et écrire « Lis SPEC.md et les prototypes, puis commence par la section 15 ».
+Mode d'emploi. Le dépôt contient ce fichier (`SPEC.md`) et le prototype de référence du voyage au Brésil, `guiao-viagem-brasil.jsx`. Ouvrir Claude Code dans ce dossier et écrire « Lis SPEC.md et le prototype, puis commence par la section 15 ».
 
 ---
 
@@ -10,10 +10,7 @@ Je veux construire une application personnelle de voyage, utilisée d'abord par 
 
 La promesse est la suivante, l'utilisateur choisit l'expérience qu'il veut vivre, l'application construit le voyage avec lui, veille sur son déroulement et l'adapte avec lui jusqu'au retour, mais ne décide jamais à sa place.
 
-Les prototypes du voyage au Brésil servent de spécification de référence pour le modèle de données, le moteur de règles, l'assistant et le design, sans être copiés tels quels puisqu'ils reposent sur un stockage propre à Claude. Le premier voyage chargé est le Brésil (14 au 26 décembre 2026, Ceará puis Amazonie). Ses données doivent être reprises exactement, sans rien inventer ni compléter.
-
-1. `bresil-2026.jsx` contient les constantes `DAYS` (13 jours et leurs slots), `HOTELS` (7 hébergements), `TRAINS` (9 trajets), les listes de la page « A reservar », les deux messages de contact (Poranduba, FOIRN) et les six étapes de la carte. Les jours de la semaine qui y sont écrits (« Dom 14 Dez », etc.) sont faux pour 2026 et ne doivent pas être importés, ils sont recalculés à partir des dates.
-2. Le document « guião Brasil » doit contenir les constantes `PLACES`, `BOOKINGS`, `DAYS`, `SRC`, `BX`, `SX`, `NOTES`, `PREP` et `NEWCHECKS`, dont dépendent le moteur de règles et le critère de validation de la phase 1. En cas de contradiction entre les deux fichiers, l'utilisateur tranche, jamais le code.
+Le fichier `guiao-viagem-brasil.jsx` est un prototype fonctionnel construit dans Claude, à utiliser comme spécification de référence pour le modèle de données, le moteur de règles, l'assistant et le design, sans le copier tel quel puisqu'il repose sur un stockage propre à Claude. Le premier voyage chargé est le Brésil (14 au 26 décembre 2026, Ceará puis Amazonie), dont les données se trouvent dans les constantes `PLACES`, `BOOKINGS`, `DAYS`, `SRC`, `BX`, `SX`, `NOTES`, `PREP` et `NEWCHECKS`, et tu dois les reprendre exactement, sans rien inventer ni compléter. Le fichier `bresil-2026.jsx`, version antérieure du guide, est exclu et ne sert de source ni pour les données ni pour le design.
 
 **L'application est construite en anglais.** Toute l'interface (libellés, boutons, messages, alertes, textes générés par l'IA) est en anglais, avec une architecture de traduction (i18n) dès le départ pour pouvoir ajouter ensuite le portugais européen et le français sans toucher au code. Le code, les noms de variables, les commentaires et le fichier `CLAUDE.md` sont aussi en anglais. Les données déjà saisies du voyage au Brésil (titres, notes) sont importées telles quelles en portugais, sans traduction automatique, et un champ `lang` indique la langue de chaque contenu.
 
@@ -210,7 +207,7 @@ Ce sont les couleurs de structure de l'interface, indépendantes de la destinati
 1. **Surfaces claires**, fond de page `#f4f7f0`, cartes `#ffffff`, bordures fines `rgba(0,0,0,0.1)`.
 2. **Texte**, principal `#1a1410` (presque noir chaud) sur fond clair, secondaire `#5a6a52`, libellés de section sur blanc `#a8780a`.
 3. **Texte clair sur fond foncé**, `rgba(205,232,212,0.75)` pour le texte courant, `#ffffff` pour les titres.
-4. **Types d'activité**, toujours les mêmes pour que l'œil les reconnaisse d'un voyage à l'autre, car ils encodent un sens et non une destination. Chaque type a quatre valeurs, reprises du prototype `bresil-2026.jsx` (constante `SC`), sauf l'hébergement corrigé pour supprimer le brun.
+4. **Types d'activité**, toujours les mêmes pour que l'œil les reconnaisse d'un voyage à l'autre, car ils encodent un sens et non une destination. Chaque type a quatre valeurs (fond, bordure, texte, point).
 
 | Type | Teinte | Fond | Bordure | Texte | Point |
 |---|---|---|---|---|---|
