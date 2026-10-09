@@ -41,6 +41,14 @@ export interface Conflict {
   dismissed?: boolean;
 }
 
+/** Local copy of an attached file, so tickets open without network. */
+export interface StoredBlob {
+  path: string;
+  tripId: string;
+  blob: Blob;
+  uploaded: boolean;
+}
+
 export class TravelDB extends Dexie {
   trips!: EntityTable<Trip, "id">;
   places!: EntityTable<WithTrip<Place>, "id">;
@@ -54,6 +62,7 @@ export class TravelDB extends Dexie {
   syncMeta!: EntityTable<SyncMeta, "key">;
   syncState!: EntityTable<SyncState, "tripId">;
   conflicts!: EntityTable<Conflict, "id">;
+  blobs!: EntityTable<StoredBlob, "path">;
 
   constructor(name = "travel-guide") {
     super(name);
@@ -73,6 +82,7 @@ export class TravelDB extends Dexie {
       syncState: "tripId",
       conflicts: "id, tripId",
     });
+    this.version(3).stores({ blobs: "path, tripId" });
   }
 }
 

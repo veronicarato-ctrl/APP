@@ -5,8 +5,10 @@ import { dateRange, nightsBetween } from "../lib/dates";
 import type { ISODate, TripState } from "../model/types";
 import { fmtDay, fmtDayLong } from "./format";
 import { Button, Card, IssueBox, SectionLabel, Sources, T } from "./primitives";
+import { Conflicts, SyncPage } from "./SyncPage";
+import { useCloudStatus } from "../sync/cloud";
 
-export type PracticalPage = "lodging" | "transport" | "bookings" | "prepare" | "verification";
+export type PracticalPage = "lodging" | "transport" | "bookings" | "prepare" | "verification" | "sync";
 const LATER: Record<string, number> = { budget: 6, safety: 6, emergency: 6, translate: 6 };
 
 interface Actions {
@@ -18,16 +20,18 @@ interface Actions {
 
 export function Practical({ s, issues, page, setPage, actions }: { s: TripState; issues: Issue[]; page: PracticalPage | null; setPage: (p: PracticalPage | null) => void; actions: Actions }) {
   const { t } = useTranslation();
+  const cloud = useCloudStatus();
   if (page) {
     return (
       <div>
         <button onClick={() => setPage(null)} className="min-h-11 text-sm font-semibold text-label mb-1">‹ {t("practical.back")}</button>
-        <h2 className="text-xl font-bold mb-3">{t(`practical.${page}`)}</h2>
+        <h2 className="text-xl font-bold mb-3">{page === "sync" ? t("sync.title") : t(`practical.${page}`)}</h2>
         {page === "lodging" && <Lodging s={s} openBooking={actions.openBooking} />}
         {page === "transport" && <Transport s={s} openBooking={actions.openBooking} />}
         {page === "bookings" && <Bookings s={s} openBooking={actions.openBooking} />}
         {page === "prepare" && <Prepare s={s} />}
         {page === "verification" && <Verification s={s} issues={issues} actions={actions} />}
+        {page === "sync" && <SyncPage />}
       </div>
     );
   }
@@ -46,6 +50,7 @@ export function Practical({ s, issues, page, setPage, actions }: { s: TripState;
     ["emergency", ""],
     ["translate", ""],
     ["verification", t("practical.verificationSummary", { errors, warnings: issues.length - errors }), errors > 0],
+    ["sync", t(`sync.tileSummary_${cloud.phase}`) + (cloud.pending && cloud.phase !== "local" ? ` · ${t("sync.pending", { count: cloud.pending })}` : ""), ["unreachable", "forbidden", "error"].includes(cloud.phase)],
   ];
   return (
     <div>
@@ -57,7 +62,7 @@ export function Practical({ s, issues, page, setPage, actions }: { s: TripState;
             <button key={k} disabled={!!later} onClick={() => setPage(k as PracticalPage)}
               className="text-left rounded-[14px] p-3.5 min-h-24 flex flex-col justify-between disabled:opacity-55"
               style={{ background: "var(--id-dark)", color: "var(--on-dark-title)" }}>
-              <span className="text-[15px] font-bold">{t(`practical.${k}`)}</span>
+              <span className="text-[15px] font-bold">{k === "sync" ? t("sync.title") : t(`practical.${k}`)}</span>
               <span className="text-[12px] mt-2" style={{ color: alert ? "var(--id-accent)" : "var(--on-dark)" }}>
                 {later ? t("common.comingIn", { phase: later }) : summary}
               </span>
@@ -247,6 +252,7 @@ function Verification({ s, issues, actions }: { s: TripState; issues: Issue[]; a
   const pending = s.bookings.filter((b) => b.status !== "confirmed").sort((a, b) => (a.status === "urgent" ? 0 : 1) - (b.status === "urgent" ? 0 : 1));
   return (
     <>
+      <Conflicts s={s} />
       <SectionLabel>{t("verification.problems")}</SectionLabel>
       {issues.length === 0 ? <p className="text-sm text-soft mb-4">{t("verification.none")}</p> : (
         <div className="flex flex-col gap-1.5 mb-5">

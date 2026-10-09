@@ -7,6 +7,8 @@ import { LANG_NAMES } from "../i18n";
 import type { Booking, BookingStatus, ISODate, Lang, Slot, SlotType, Text, TripState } from "../model/types";
 import { fmtDay } from "./format";
 import { Button, Field, Sheet } from "./primitives";
+import { keepFiles, openFile } from "../sync/files";
+import { cloud } from "../sync/cloud";
 
 const TYPES: SlotType[] = ["transport", "lodging", "meal", "culture", "nature", "show", "rest", "ritual"];
 const STATUSES: BookingStatus[] = ["todo", "urgent", "confirmed"];
@@ -94,14 +96,18 @@ export function BookingEditor({ s, id, onSave, onClose }: { s: TripState; id: st
   const { t } = useTranslation();
   const orig = s.bookings.find((b) => b.id === id)!;
   const [b, setB] = useState<Booking>(orig);
+  const [added, setAdded] = useState<File[]>([]);
+  const [missing, setMissing] = useState<string>();
   const upd = (p: Partial<Booking>) => setB({ ...b, ...p });
   const when = orig.from ? `${fmtDay(orig.from)} → ${fmtDay(orig.to!)}` : orig.date ? fmtDay(orig.date) : "";
 
-  const save = () => {
+  const save = async () => {
     if (orig.status === "confirmed" && b.status !== "confirmed" && !window.confirm(t("bookingEditor.confirmUnlock"))) return;
     if (b.status === "confirmed" && orig.status !== "confirmed" && !b.ref && !window.confirm(t("bookingEditor.confirmNoRef"))) return;
-    onSave(b);
+    const refs = added.length ? await keepFiles(s.trip.id, b.id, added) : [];
+    onSave(refs.length ? { ...b, files: [...(b.files ?? []), ...refs] } : b);
   };
+  const kb = (n: number) => (n > 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} kB`);
 
   return (
     <Sheet title={<span lang={orig.title.lang}>{orig.title.text}</span>} subtitle={`${t(`kind.${orig.kind}`)}${when ? " · " + when : ""}`} onClose={onClose}>
@@ -125,6 +131,28 @@ export function BookingEditor({ s, id, onSave, onClose }: { s: TripState; id: st
       <Field label={t("bookingEditor.note")}>
         <textarea className="field" rows={3} lang={b.note?.lang} value={b.note?.text ?? ""} onChange={(e) => upd({ note: setText(b.note, e.target.value, "en") })} />
       </Field>
+      <div className="mb-3">
+        <p className="text-[12.5px] text-soft mb-1">{t("bookingEditor.files")}</p>
+        {(b.files ?? []).map((f) => (
+          <div key={f.id} className="flex items-center gap-2 py-1 border-t border-line text-[13px]">
+            <span className="flex-1 break-all">{f.name} <span className="text-soft">({kb(f.size)})</span></span>
+            <button className="min-h-11 px-3 font-semibold underline" onClick={async () => setMissing((await openFile(f, cloud)) ? undefined : f.id)}>{t("bookingEditor.open")}</button>
+            <button className="min-h-11 px-2 text-soft" onClick={() => window.confirm(t("bookingEditor.confirmRemove", { name: f.name })) && upd({ files: (b.files ?? []).filter((x) => x.id !== f.id) })}>{t("bookingEditor.remove")}</button>
+          </div>
+        ))}
+        {missing && <p className="text-[12px] text-soft">{t("bookingEditor.notHere")}</p>}
+        {added.map((f, i) => (
+          <div key={i} className="flex items-center gap-2 py-1 border-t border-line text-[13px]">
+            <span className="flex-1 break-all">{f.name} <span className="text-soft">({kb(f.size)})</span></span>
+            <button className="min-h-11 px-2 text-soft" onClick={() => setAdded(added.filter((_, k) => k !== i))}>{t("bookingEditor.remove")}</button>
+          </div>
+        ))}
+        <label className="inline-flex items-center min-h-11 px-4 mt-1 rounded-[10px] border border-line font-semibold cursor-pointer">
+          + {t("bookingEditor.addFiles")}
+          <input type="file" multiple accept="image/*,application/pdf" className="sr-only"
+            onChange={(e) => { setAdded([...added, ...Array.from(e.target.files ?? [])]); e.target.value = ""; }} />
+        </label>
+      </div>
       <div className="flex justify-end gap-2 mt-2">
         <Button variant="ghost" onClick={onClose}>{t("common.cancel")}</Button>
         <Button onClick={save}>{t("common.save")}</Button>

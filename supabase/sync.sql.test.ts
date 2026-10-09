@@ -52,6 +52,14 @@ describe("supabase migration", () => {
     expect(b.rev).toBe(a.rev);
   });
 
+  it("keeps trip files private to the trip's members", async () => {
+    const path = `${TRIP}/f3/ticket.pdf`;
+    await as(ANA, "insert into storage.objects (bucket_id, name) values ('trip-files', $1)", [path]);
+    await expect(as(EVE, "insert into storage.objects (bucket_id, name) values ('trip-files', $1)", [`${TRIP}/x/y.pdf`])).rejects.toThrow(/row-level security/);
+    expect(await as(BEN, "select name from storage.objects")).toEqual([{ name: path }]);
+    expect(await as(EVE, "select name from storage.objects")).toEqual([]);
+  });
+
   it("cannot delete rows directly, deletions are a field", async () => {
     await expect(as(ANA, "delete from records")).rejects.toThrow(/permission denied/);
     expect(await as(ANA, "select * from records")).toHaveLength(1);

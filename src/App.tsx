@@ -11,6 +11,9 @@ import { MapView } from "./ui/MapView";
 import { Practical, type PracticalPage } from "./ui/Practical";
 import { Today } from "./ui/Today";
 import { useTrip } from "./ui/useTrip";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "./db/db";
+import { useCloudStatus } from "./sync/cloud";
 
 type Tab = "today" | "itinerary" | "map" | "practical" | "assistant";
 const TABS: [Tab, string][] = [["today", "☀"], ["itinerary", "☰"], ["map", "⌖"], ["practical", "▦"], ["assistant", "✦"]];
@@ -26,6 +29,8 @@ export default function App() {
   const [slotEd, setSlotEd] = useState<{ date: ISODate; id: string | null } | null>(null);
   const [bookingEd, setBookingEd] = useState<string | null>(null);
   const [appearance, setAppearance] = useAppearance();
+  const cloud = useCloudStatus();
+  const conflicts = useLiveQuery(() => db.conflicts.filter((c) => !c.dismissed).count(), []) ?? 0;
 
   useEffect(() => { if (s) applyTripTheme(s.trip.theme); }, [s?.trip.theme]);
   if (!s) return <p className="p-6 text-soft">Loading…</p>;
@@ -53,6 +58,12 @@ export default function App() {
             </button>
             {", "}{t("common.locked", { count: locked })}
           </p>
+          <button onClick={() => { setTab("practical"); setPage("sync"); }}
+            className="mt-1.5 text-[11.5px] font-semibold px-2.5 py-1 rounded-full border"
+            style={{ borderColor: "var(--watermark)", color: ["unreachable", "forbidden", "error"].includes(cloud.phase) ? "var(--error-on-dark)" : "var(--on-dark)", background: "var(--watermark)" }}>
+            {cloud.phase === "syncing" ? "⟳" : cloud.phase === "idle" && !cloud.pending ? "✓" : "●"} {t(`sync.chip_${cloud.phase}`)}
+            {cloud.pending > 0 && cloud.phase !== "local" ? ` · ${cloud.pending}` : ""}
+          </button>
           {(tab === "itinerary" || tab === "map") && (
             <div className="mt-2">
               <DayStrip s={s} issues={issues} selected={tab === "map" ? mapDate : focus} onSelect={tab === "map" ? setMapDate : goToDay} />
@@ -63,6 +74,13 @@ export default function App() {
       </header>
 
       <main className="max-w-3xl mx-auto px-4 pt-4">
+        {conflicts > 0 && (
+          <button onClick={() => { setTab("practical"); setPage("verification"); }} role="alert"
+            className="w-full text-left mb-3 text-[13px] px-3 py-2 rounded-md font-semibold"
+            style={{ background: "var(--error-bg)", color: "var(--error-ink)", borderLeft: "3px solid var(--error)" }}>
+            {t("sync.banner", { count: conflicts })}
+          </button>
+        )}
         {tab === "itinerary" && <Itinerary s={s} issues={issues} focus={focus} actions={{ editSlot: (date, id) => setSlotEd({ date, id }), openBooking: setBookingEd }} />}
         {tab === "today" && <Today s={s} issues={issues} actions={{ openBooking: setBookingEd, goToDay, openVerification: () => { setTab("practical"); setPage("verification"); } }} />}
         {tab === "map" && <MapView s={s} date={mapDate} setDate={setMapDate} goToDay={goToDay} />}

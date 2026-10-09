@@ -62,6 +62,16 @@ export interface Link {
   url: string;
 }
 
+/** Ticket, QR code or photo attached to a booking. The bytes live in storage, a copy stays on the phone. */
+export interface FileRef {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  path: string; // "<trip id>/<booking id>/<file id>-<name>"
+  addedAt: string;
+}
+
 export interface Booking {
   id: string;
   key: string;
@@ -89,6 +99,7 @@ export interface Booking {
   noRoute?: boolean;
   warn?: Text;
   price?: Price;
+  files?: FileRef[];
 }
 
 export type SlotType =
