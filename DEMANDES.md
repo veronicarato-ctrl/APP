@@ -66,3 +66,13 @@ Score de sérénité expliqué et humeur du jour (SPEC section 7), récit du par
 
 ### Point à trancher
 Le style visuel (fond crème, bouton terracotta, titres à empattement) diffère de la SPEC section 10. Aucun changement de design sans décision explicite de Vicky.
+
+### Captures complémentaires, onglet « Jours »
+Chaque jour porte un numéro, une ville et une phrase de résumé en italique, puis une frise horaire. Chaque activité indique l'heure de début, la durée en minutes, un type (Visite, Activité, Restaurant, Transport), une description, un lieu, un prix estimé et une étiquette « Suggestion IA ».
+
+Idées à reprendre, l'étiquette « Suggestion IA » (conforme au principe 5 de la SPEC, chaque information dit sa nature), la durée affichée sous l'heure, la phrase de résumé du jour et le conseil pratique dans la description (« vérifiez que les deux visites sont bien incluses avant de payer »).
+
+Défauts visibles à ne pas reproduire.
+1. Prix affiché deux fois (« ~25,0 EUR » puis « 25,0 EUR ») avec une décimale inutile, et sans dire s'il s'entend par personne ou pour deux.
+2. Le trajet Bologne vers Parme est rattaché au seul lieu « Gare de Parme », sans lieu de départ, alors que l'app actuelle exige un départ et une arrivée pour chaque transport.
+3. Restaurants et adresses nommés (Tamburini, Salumeria Garibaldi, Osteria dei Servi) sans source, ni date de vérification, ni horaires d'ouverture, ce que le moteur de règles actuel signale justement (jours d'ouverture).
