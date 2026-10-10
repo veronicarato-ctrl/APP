@@ -61,7 +61,7 @@ Score de sérénité expliqué et humeur du jour (SPEC section 7), récit du par
 ### Défauts visibles à ne pas reproduire
 1. La même photo, qui semble montrer la côte amalfitaine en Campanie, illustre des voyages en Émilie‑Romagne, loin de là. Une photo doit correspondre au lieu ou être présentée comme simple illustration.
 2. Score « 85, Excellent » alors que l'alerte indique un budget dépassé de 3 253 EUR pour 2 000 EUR prévus. Le score doit refléter les alertes.
-3. Hébergement à « ~110 EUR » pour 2 nuits à « 110 EUR/nuit », le total affiché ne correspond pas au prix par nuit.
+3. Hébergement à « ~110 EUR » pour 2 nuits à « 110 EUR/nuit ». Le budget compte bien 640 EUR (110, 100 et 110 EUR pour deux nuits chacun), donc le calcul est juste mais l'affichage est ambigu, le gros chiffre devant être le total du séjour.
 4. Noms d'hôtels et prix proposés sans source ni date de vérification, contraire aux principes 5 et 6 de la SPEC.
 
 ### Point à trancher
@@ -76,3 +76,15 @@ Défauts visibles à ne pas reproduire.
 1. Prix affiché deux fois (« ~25,0 EUR » puis « 25,0 EUR ») avec une décimale inutile, et sans dire s'il s'entend par personne ou pour deux.
 2. Le trajet Bologne vers Parme est rattaché au seul lieu « Gare de Parme », sans lieu de départ, alors que l'app actuelle exige un départ et une arrivée pour chaque transport.
 3. Restaurants et adresses nommés (Tamburini, Salumeria Garibaldi, Osteria dei Servi) sans source, ni date de vérification, ni horaires d'ouverture, ce que le moteur de règles actuel signale justement (jours d'ouverture).
+
+### Captures complémentaires, onglets « Carte », « Budget » et « Infos »
+1. Carte OpenStreetMap avec les trois villes (Parme, Modène, Bologne) et la mention « Positions approximatives générées par l'IA. À vérifier avant de réserver. »
+2. « Budget vivant » avec total prévu, reste, dépensé, taux de change, répartition estimée (hébergement 640, repas 1 490, activités 772, transport 55, autres 296, total 3 253 EUR) et bouton « Enregistrer une dépense ».
+3. « Infos » avec l'intention initiale citée telle quelle (« J'ai envie de découvrir la gastronomie italienne en une semaine. Mais je veux pas de pâtes et de pizza. »), les paramètres déduits (destination Italie, 7 jours, 2 adultes, budget 2 000 EUR, rythme soutenu, rentrer surpris), les incontournables et un encadré « Transparence » (suggestions IA non confirmées, météo, événements et taux de change simulés).
+
+Idées à reprendre, l'intention initiale gardée mot pour mot et les paramètres déduits affichés à côté (SPEC section 6.1, une phrase suffit à lancer une proposition), la mention de transparence sur la carte et sur les prix, la répartition du budget par catégorie et la saisie d'une dépense (SPEC section 7.9).
+
+Défauts visibles à ne pas reproduire.
+1. Le budget de 2 000 EUR donné par l'utilisateur est ignoré, la proposition coûte 3 253 EUR, soit 63 % de plus, et l'écran Budget prend l'estimation comme « total prévu » au lieu du budget voulu. Dans la SPEC, le budget passe avant les préférences (principe 7), l'assistant doit donc proposer dans le budget ou expliquer pourquoi c'est impossible et proposer des arbitrages.
+2. Taux affiché « 1 EUR ≈ 1.000 EUR », sans intérêt quand la devise est la même, avec un point décimal au lieu d'une virgule.
+3. Météo, événements et taux de change simulés. Même annoncées, des données inventées sont exclues par la SPEC (principe 6), une donnée sans source reste vide.
