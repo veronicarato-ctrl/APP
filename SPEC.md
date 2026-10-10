@@ -291,9 +291,10 @@ Cette section fixe l'orientation décidée le 10 octobre 2026. Les points marqu�
 Rendre l'application publique, payante et utilisable dans le monde entier, en espagnol, portugais, français, anglais et chinois, à partir de la base construite pour l'usage personnel.
 
 ### 16.2 Société (à valider)
-1. La société est à créer. Le pays se choisit d'après le lieu de résidence et de direction effective des fondateurs, et non d'après leur nationalité française ou portugaise. En droit suisse, une société étrangère dont la direction courante s'exerce en Suisse y est imposée sur son bénéfice mondial (art. 50 LIFD).
-2. Si les fondateurs résident et dirigent depuis la Suisse, l'hypothèse de travail est une Sàrl suisse (capital de 20 000 CHF entièrement libéré, une personne domiciliée en Suisse pouvant représenter la société).
-3. Une société portugaise (Lda, capital d'un euro par associé) n'a de sens que si la direction s'exerce réellement au Portugal. Une société estonienne par e‑Residency ne change rien si la direction reste en Suisse.
+1. La société est à créer. Le pays se choisit d'après le lieu de résidence et de direction effective des fondateurs, et non d'après leur nationalité française ou portugaise, le lieu de direction effective pouvant créer une résidence fiscale de la société.
+2. Les fondateurs résident en France. L'hypothèse de travail est donc une société française (SAS ou SARL), soumise à l'impôt sur les sociétés au taux réduit de 15 % jusqu'à 42 500 euros de bénéfice pour les PME éligibles et à 25 % au‑delà (barème à confirmer sur la loi de finances 2026).
+3. Une société portugaise, suisse ou estonienne dirigée depuis la France n'apporterait pas d'avantage et compliquerait la fiscalité. Le choix final se fait avec un expert‑comptable.
+4. Pour la version personnelle, le RGPD ne s'applique pas aux traitements effectués dans le cadre d'une activité strictement personnelle ou domestique (art. 2.2.c). Il s'appliquera pleinement dès la commercialisation.
 
 ### 16.3 Grille tarifaire (proposition, à valider après mesure du coût réel de l'IA en phases 4 et 5)
 Repères de la concurrence relevés en octobre 2026, Wanderlog Pro environ 40 dollars par an, TripIt Pro 49 dollars par an, Layla environ 49 dollars par an, Polarsteps Plus 29,99 euros par an ou 8,99 euros par mois.
