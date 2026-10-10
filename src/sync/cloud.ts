@@ -115,6 +115,20 @@ export function startCloud(id: string) {
     .subscribe();
 }
 
+/** Creates the account. Returns true when Supabase asks to confirm the address by e-mail first. */
+export async function signUpWithPassword(email: string, password: string) {
+  if (!cloud) throw new Error("Sync is not configured");
+  const { data, error } = await cloud.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } });
+  if (error) throw error;
+  return !data.session;
+}
+
+export async function signInWithPassword(email: string, password: string) {
+  if (!cloud) throw new Error("Sync is not configured");
+  const { error } = await cloud.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+}
+
 export async function sendSignInEmail(email: string) {
   if (!cloud) throw new Error("Sync is not configured");
   const { error } = await cloud.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin } });

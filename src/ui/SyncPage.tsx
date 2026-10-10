@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { db, type Conflict } from "../db/db";
 import { saveBooking } from "../db/repo";
 import type { TripState } from "../model/types";
-import { invite, sendSignInEmail, signOut, syncNow, useCloudStatus, verifyCode } from "../sync/cloud";
+import { invite, sendSignInEmail, signInWithPassword, signOut, signUpWithPassword, syncNow, useCloudStatus, verifyCode } from "../sync/cloud";
 import { Button, Card, Field, SectionLabel } from "./primitives";
 
 const when = (iso?: string) => (iso ? new Date(iso).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" }) : undefined);
@@ -23,12 +23,14 @@ export function SyncPage() {
   const st = useCloudStatus();
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
+  const [password, setPassword] = useState("");
+  const [info, setInfo] = useState<string>();
   const [sentTo, setSentTo] = useState<string>();
   const [guest, setGuest] = useState("");
   const [msg, setMsg] = useState<string>();
   const [busy, setBusy] = useState(false);
   const run = async (f: () => Promise<void>) => {
-    setBusy(true); setMsg(undefined);
+    setBusy(true); setMsg(undefined); setInfo(undefined);
     try { await f(); } catch (e) {
       const m = e instanceof Error ? e.message : String((e as { message?: string }).message ?? e);
       setMsg(/fetch|network|load failed/i.test(m) ? t("sync.netError") : m);
@@ -41,17 +43,32 @@ export function SyncPage() {
   if (st.phase === "signedOut")
     return (
       <div>
-        <p className="text-sm mb-3">{t("sync.signInIntro")}</p>
+        <p className="text-sm mb-3">{t("sync.passwordIntro")}</p>
         <Field label={t("sync.email")}><input className="field" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} /></Field>
-        <Button disabled={!email || busy} onClick={() => run(async () => { await sendSignInEmail(email.trim()); setSentTo(email.trim()); })}>{t("sync.sendLink")}</Button>
-        {sentTo && (
-          <div className="mt-4">
-            <p className="text-sm mb-2">{t("sync.sent", { email: sentTo })}</p>
-            <Field label={t("sync.code")}><input className="field" inputMode="numeric" autoComplete="one-time-code" value={code} onChange={(e) => setCode(e.target.value)} /></Field>
-            <Button disabled={!code || busy} onClick={() => run(() => verifyCode(sentTo, code.trim()))}>{t("sync.verify")}</Button>
-          </div>
-        )}
+        <Field label={t("sync.password")}><input className="field" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} /></Field>
+        <div className="flex flex-wrap gap-2">
+          <Button disabled={!email || password.length < 8 || busy} onClick={() => run(() => signInWithPassword(email.trim(), password))}>{t("sync.signIn")}</Button>
+          <Button variant="ghost" disabled={!email || password.length < 8 || busy}
+            onClick={() => run(async () => { const confirm = await signUpWithPassword(email.trim(), password); if (confirm) setInfo(t("sync.confirmSent", { email: email.trim() })); })}>
+            {t("sync.createAccount")}
+          </Button>
+        </div>
+        <p className="text-[12px] text-soft mt-2">{t("sync.passwordRule")}</p>
+        {info && <p className="text-[13px] mt-3">{info}</p>}
         {msg && <div className="mt-3"><Notice tone="error">{msg}</Notice></div>}
+
+        <details className="mt-6">
+          <summary className="text-[13px] text-soft cursor-pointer min-h-11 flex items-center">{t("sync.codeAlternative")}</summary>
+          <p className="text-sm my-2">{t("sync.signInIntro")}</p>
+          <Button disabled={!email || busy} onClick={() => run(async () => { await sendSignInEmail(email.trim()); setSentTo(email.trim()); })}>{t("sync.sendLink")}</Button>
+          {sentTo && (
+            <div className="mt-4">
+              <p className="text-sm mb-2">{t("sync.sent", { email: sentTo })}</p>
+              <Field label={t("sync.code")}><input className="field" inputMode="numeric" autoComplete="one-time-code" value={code} onChange={(e) => setCode(e.target.value)} /></Field>
+              <Button disabled={!code || busy} onClick={() => run(() => verifyCode(sentTo, code.trim()))}>{t("sync.verify")}</Button>
+            </div>
+          )}
+        </details>
       </div>
     );
 
