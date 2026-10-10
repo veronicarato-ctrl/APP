@@ -279,5 +279,38 @@ Stockage limité à Claude et sans synchronisation, aucun mode hors ligne, carte
 5. **Phase 5**, carte postale et Surprise me (avec réserve hors ligne).
 6. **Phase 6**, budget vivant et double devise, météo, Préparer enrichi, Sécurité, Urgences et bouton SOS, Traduire. Le bouton SOS et la fiche d'urgence peuvent être avancés en phase 2 s'ils sont simples, car ils doivent exister même si le reste n'est pas terminé.
 7. **Phase 7**, co‑construction d'un nouveau voyage à partir d'une phrase, import de confirmations, exports PDF et JSON.
+8. **Phase 8, après le voyage de décembre 2026**, commercialisation selon la section 16. Elle ne commence qu'après le retour du Brésil, une fois le retour d'expérience du voyage intégré.
+
+Les phases 1 à 7 forment la **version personnelle**, utilisée par deux adultes pour le voyage au Brésil, qui sert de test grandeur nature. Tant que dure cette version, les offres gratuites de Supabase et de Vercel restent utilisables, l'offre Hobby de Vercel étant réservée aux projets personnels non commerciaux. Aucune décision des phases 1 à 7 ne doit cependant fermer la voie à la commercialisation (identifiants, langues, couleurs par voyage et données hors du code restent obligatoires).
+
+## 16. Commercialisation (phase 8, après décembre 2026)
+
+Cette section fixe l'orientation décidée le 10 octobre 2026. Les points marqués « à valider » demandent l'avis d'un juriste ou d'une fiduciaire avant le lancement payant.
+
+### 16.1 Objectif
+Rendre l'application publique, payante et utilisable dans le monde entier, en espagnol, portugais, français, anglais et chinois, à partir de la base construite pour l'usage personnel.
+
+### 16.2 Société (à valider)
+1. La société est à créer. Le pays se choisit d'après le lieu de résidence et de direction effective des fondateurs, et non d'après leur nationalité française ou portugaise. En droit suisse, une société étrangère dont la direction courante s'exerce en Suisse y est imposée sur son bénéfice mondial (art. 50 LIFD).
+2. Si les fondateurs résident et dirigent depuis la Suisse, l'hypothèse de travail est une Sàrl suisse (capital de 20 000 CHF entièrement libéré, une personne domiciliée en Suisse pouvant représenter la société).
+3. Une société portugaise (Lda, capital d'un euro par associé) n'a de sens que si la direction s'exerce réellement au Portugal. Une société estonienne par e‑Residency ne change rien si la direction reste en Suisse.
+
+### 16.3 Grille tarifaire (proposition, à valider après mesure du coût réel de l'IA en phases 4 et 5)
+Repères de la concurrence relevés en octobre 2026, Wanderlog Pro environ 40 dollars par an, TripIt Pro 49 dollars par an, Layla environ 49 dollars par an, Polarsteps Plus 29,99 euros par an ou 8,99 euros par mois.
+1. **Gratuit**, un voyage actif, planification manuelle, moteur de règles, carte, hors ligne, quelques demandes à l'assistant par voyage.
+2. **Pass voyage**, paiement unique par voyage (ordre de grandeur 19 euros ou francs), assistant complet pendant la durée du voyage, partage avec les compagnons de route, fiches sécurité et urgences, cartes postales. C'est l'offre qui distingue l'application, la plupart des voyageurs ne partant que quelques fois par an.
+3. **Annuel**, voyages illimités et assistant en usage raisonnable (ordre de grandeur 49 euros ou francs par an), au niveau de TripIt et Layla mais avec davantage de fonctions.
+4. Prix adaptés au pouvoir d'achat par pays, plafonds d'usage de l'IA par compte, et prestataire de paiement agissant si possible comme vendeur officiel pour la TVA.
+
+### 16.4 Langues et marchés
+1. Interface en anglais, français, espagnol, portugais (européen d'abord, brésilien ensuite) et chinois, par l'architecture de traduction existante, chaque texte saisi gardant sa langue d'origine.
+2. Chine continentale, l'API Claude n'y est pas disponible, et Google Maps comme Google Traduction y sont bloqués. Le chinois vise donc d'abord les voyageurs sinophones hors de Chine continentale. Un marché chinois demanderait d'autres fournisseurs d'IA, de cartes et de paiement, et fera l'objet d'une décision séparée.
+
+### 16.5 Travaux de la phase 8
+1. Comptes publics, plusieurs voyages par compte, démarrage par la co‑construction (phase 7) au lieu du voyage au Brésil.
+2. Paiement, abonnements et passes, gestion des droits d'accès.
+3. Passage aux offres payantes de Vercel (Pro) et Supabase (Pro, sans mise en pause), fournisseur de tuiles cartographiques commercial au lieu des serveurs bénévoles d'OpenStreetMap.
+4. Pages légales (conditions, confidentialité selon la LPD et, pour les clients européens, probablement le RGPD, éditeur), suppression de compte, mises en garde renforcées sur la santé, la sécurité et les urgences.
+5. Traductions, revue de sécurité, plafonds d'usage et suivi des coûts de l'IA.
 
 Avant de commencer, pose‑moi les questions dont tu as besoin.
