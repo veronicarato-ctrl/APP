@@ -93,3 +93,7 @@ Défauts visibles à ne pas reproduire.
 Écran « Nouveau voyage » en quatre étapes signalées par une barre de progression. L'étape 1 « Intention » affiche le titre « Raconte-nous ton voyage. », le texte « Une phrase suffit. L'IA extrait tout, destination, dates, budget, envies. », un grand champ libre, puis une rubrique « Besoin d'inspiration ? » avec trois exemples de phrases (Italie à deux avec 4 000 €, week-end romantique à Lisbonne, deux semaines en famille au Japon avec enfants de 8 et 11 ans).
 
 C'est la forme attendue pour le point 4 (zone libre pour dicter ses envies) et pour la SPEC section 6.1. À reprendre, le parcours en étapes avec barre de progression, la phrase libre en premier, et des exemples d'inspiration qui montrent quoi écrire (voyageurs, durée, période, budget, envies, incontournables). Les trois étapes suivantes ne figurent pas sur les captures.
+
+## Cahier des modifications
+
+Toutes ces demandes sont mises en page, avec les décisions à prendre et l'ordre de réalisation, dans le document « Guião de viagem, cahier des modifications » (https://claude.ai/code/artifact/616bb9fc-ec36-4540-91d5-cdfd15f86391), qui fait référence en cas d'écart avec ce fichier.
