@@ -43,3 +43,26 @@ La version actuelle (phases 1 à 3) ne contient pas encore d'assistant, elle ran
 
 ### Recommandation sur la mesure des thèmes (point 7)
 Recommandation de Claude, en attente de décision, une note de 0 à 5 par thème plutôt que des pourcentages. Les pourcentages obligent à faire un calcul et à retirer d'un thème ce qu'on donne à un autre, alors qu'un voyageur peut vouloir à la fois beaucoup de luxe et beaucoup de gastronomie. La note indépendante reste simple sur un téléphone, et l'assistant peut ensuite en tirer des proportions.
+
+## Référence du 10 octobre 2026, captures de l'application Emergent « AI travel copilot »
+
+Cinq captures envoyées par Vicky, sans consigne écrite. Le lien de prévisualisation n'est pas accessible depuis l'environnement de Claude.
+
+### Ce que montrent les captures
+1. Accueil « Bonjour, où partons-nous », grande carte photo du voyage en cours (pays, titre, durée, coût estimé, score de sérénité), liste « Mes autres voyages » avec vignette photo, et gros bouton « Nouveau voyage ».
+2. Page d'un voyage avec photo plein écran, titre, durée, nombre de voyageurs et coût, bouton « Mood du jour », onglets Aperçu, Jours, Carte, Budget.
+3. Score de sérénité sur 100 avec une appréciation, une alerte « Budget dépassé » chiffrée et des points positifs (« Tes incontournables sont tous couverts »).
+4. « Le fil du voyage », un paragraphe qui raconte le parcours proposé et dit ce qui est estimé et ce qui n'est pas inclus.
+5. « Expérience recherchée », des thèmes notés par des points (Gastronomie cinq points, Michelin, Nature, Vie locale trois points), puis la liste des hébergements avec ville, nuits, description et prix estimé.
+
+### Idées à reprendre, déjà prévues par la SPEC
+Score de sérénité expliqué et humeur du jour (SPEC section 7), récit du parcours proposé, thèmes notés par points (ce qui confirme la recommandation d'une note de 0 à 5 plutôt que des pourcentages), photos en tête de voyage (point 8).
+
+### Défauts visibles à ne pas reproduire
+1. La même photo, qui semble montrer la côte amalfitaine en Campanie, illustre des voyages en Émilie‑Romagne, loin de là. Une photo doit correspondre au lieu ou être présentée comme simple illustration.
+2. Score « 85, Excellent » alors que l'alerte indique un budget dépassé de 3 253 EUR pour 2 000 EUR prévus. Le score doit refléter les alertes.
+3. Hébergement à « ~110 EUR » pour 2 nuits à « 110 EUR/nuit », le total affiché ne correspond pas au prix par nuit.
+4. Noms d'hôtels et prix proposés sans source ni date de vérification, contraire aux principes 5 et 6 de la SPEC.
+
+### Point à trancher
+Le style visuel (fond crème, bouton terracotta, titres à empattement) diffère de la SPEC section 10. Aucun changement de design sans décision explicite de Vicky.
