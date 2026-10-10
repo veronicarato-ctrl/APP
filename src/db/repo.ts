@@ -4,7 +4,7 @@ import { importBrazil, PROTOTYPE } from "../data/importBrazil";
 import { THEMES } from "../data/themes";
 import { dateRange } from "../lib/dates";
 import { newId } from "../lib/ids";
-import type { Booking, Check, ISODate, Place, Slot, Trip, TripState } from "../model/types";
+import type { Booking, Check, ISODate, Place, Slot, TravelMode, Trip, TripState } from "../model/types";
 
 type WriteListener = (tripId: string, d: TravelDB, opts: { baseline?: boolean }) => void | Promise<void>;
 const listeners = new Set<WriteListener>();
@@ -40,8 +40,13 @@ export interface NewTrip {
   origin: string;
   homeTz: string;
   homeCurrency: string;
-  destTz: string;
-  themeKey: string;
+  /** Currency of the visited country; empty when not known yet. */
+  destCurrency: string;
+  /** Total for all travellers, in homeCurrency. */
+  budget: number | null;
+  /** The traveller's wishes, kept verbatim; empty when not given. */
+  intent: string;
+  modes: Partial<Record<TravelMode, number>>;
 }
 
 /** Creates an empty trip with one day per date and the default rules of SPEC section 8. */
@@ -58,11 +63,14 @@ export async function createTrip(input: NewTrip, d: TravelDB = db) {
     homeTz: input.homeTz,
     homePlug: { types: [], voltage: 0 },
     homeCurrency: input.homeCurrency,
-    budget: null,
+    ...(input.destCurrency ? { destCurrency: input.destCurrency } : {}),
+    budget: input.budget,
+    ...(input.intent.trim() ? { intent: { text: input.intent, lang: input.lang } } : {}),
+    modes: input.modes,
     rules: { maxHeavy: 2, siesta: false, checkoutBy: "10:00", minMarginMin: null },
     regions: [],
-    theme: THEMES[input.themeKey] ?? THEMES.neutral,
-    destTz: input.destTz,
+    // Colours are set by the app, not chosen in the form (change request of 10 October 2026).
+    theme: THEMES.neutral,
     v: 2,
   };
   const days = Object.fromEntries(dateRange(input.start, input.end).map((date) => [date, { date, slots: [] }]));

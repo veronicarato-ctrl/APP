@@ -181,6 +181,9 @@ export interface TripTheme {
   regions: Record<string, { onDark: string; onLight: string }>;
 }
 
+/** Travel themes the traveller rates from 0 (not for us) to 5 (essential), SPEC section 6.2. */
+export type TravelMode = "gastronomy" | "relaxation" | "sportNature" | "culture" | "discovery" | "luxury" | "localLife";
+
 export interface Trip {
   id: string;
   name: Text;
@@ -190,12 +193,20 @@ export interface Trip {
   origin: Text;
   homeTz: string;
   homePlug: { types: string[]; voltage: number };
+  /** Currency of the traveller's home country (ISO 4217). */
   homeCurrency: string;
+  /** Currency of the visited country (ISO 4217), for the double-currency budget (SPEC section 7.9). */
+  destCurrency?: string;
+  /** Total budget for all travellers, in homeCurrency. */
   budget: number | null;
+  /** The traveller's wishes in their own words, kept verbatim (SPEC section 6.1). */
+  intent?: Text;
+  /** Rating of each travel theme; an absent theme was not rated. */
+  modes?: Partial<Record<TravelMode, number>>;
   rules: TripRules;
   regions: Region[];
   theme: TripTheme;
-  /** Default zone for new places of this trip (IANA). */
+  /** Default zone for new places (IANA). Set by older trips and the example; no longer asked. */
   destTz?: string;
   prepNote?: Text;
   v: number;

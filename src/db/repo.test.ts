@@ -48,7 +48,7 @@ describe("local storage", () => {
   });
 });
 
-const NEW = { name: "Japan", lang: "en" as const, start: "2027-04-01", end: "2027-04-03", adults: 2, children: [], origin: "Geneva", homeTz: "Europe/Paris", homeCurrency: "EUR", destTz: "Asia/Tokyo", themeKey: "neutral" };
+const NEW = { name: "Japan", lang: "en" as const, start: "2027-04-01", end: "2027-04-03", adults: 2, children: [], origin: "Geneva", homeTz: "Europe/Paris", homeCurrency: "EUR", destCurrency: "JPY", budget: 3000, intent: "Deux semaines au Japon, temples et onsen.", modes: { culture: 5, relaxation: 3 } };
 
 describe("several trips", () => {
   it("creates an empty trip with one day per date and makes it the active one", async () => {
@@ -58,6 +58,20 @@ describe("several trips", () => {
     expect(Object.keys(s.days).sort()).toEqual(["2027-04-01", "2027-04-02", "2027-04-03"]);
     expect(s.bookings).toEqual([]);
     expect((await listTrips(d)).map((t) => t.name.text)).toEqual(["Brasil, praia e Amazónia", "Japan"]);
+  });
+
+  it("keeps the wishes word for word, the budget, both currencies and the themes, with app-chosen colours", async () => {
+    const id = await createTrip(NEW, d);
+    const { trip } = (await loadState(id, d))!;
+    expect(trip.intent).toEqual({ text: "Deux semaines au Japon, temples et onsen.", lang: "en" });
+    expect(trip.budget).toBe(3000);
+    expect([trip.homeCurrency, trip.destCurrency]).toEqual(["EUR", "JPY"]);
+    expect(trip.modes).toEqual({ culture: 5, relaxation: 3 });
+    expect(trip.theme.dark).toBe("#1d3557");
+    expect(trip.destTz).toBeUndefined();
+    const bare = await createTrip({ ...NEW, intent: "  ", destCurrency: "", budget: null, modes: {} }, d);
+    const b = (await loadState(bare, d))!.trip;
+    expect([b.intent, b.destCurrency, b.budget]).toEqual([undefined, undefined, null]);
   });
 
   it("keeps trips independent", async () => {

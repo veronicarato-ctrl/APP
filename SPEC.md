@@ -30,14 +30,14 @@ Le fichier `guiao-viagem-brasil.jsx` est un prototype fonctionnel construit dans
 2. Hors ligne d'abord, avec copie locale complète du voyage dans IndexedDB (Dexie) et mise en cache de l'application.
 3. Supabase (offre gratuite) pour l'authentification par lien magique, la base de données, la synchronisation entre deux comptes partageant un voyage et le stockage des photos et billets. Résolution des conflits par champ, avec alerte visible si une réservation confirmée a été modifiée des deux côtés. Prévoir la remise en route si le projet gratuit est mis en pause après une semaine d'inactivité.
 4. Vercel (offre Hobby) pour l'hébergement, déployé automatiquement depuis GitHub.
-5. Fonctions serveur Vercel pour tous les appels à l'API Claude, la clé restant dans une variable d'environnement secrète et n'atteignant jamais le téléphone.
+5. Fonctions serveur Vercel pour tous les appels à l'API de l'IA, le fournisseur étant choisi par un essai à l'aveugle au début de la phase 4 (cahier des modifications du 10 octobre 2026) et la fonction restant indépendante du fournisseur, la clé restant dans une variable d'environnement secrète et n'atteignant jamais le téléphone.
 6. Carte Leaflet avec tuiles OpenStreetMap, en respectant leur politique d'usage (pas de téléchargement massif de tuiles).
 7. Météo et taux de change par des services gratuits sans clé (par exemple Open‑Meteo et Frankfurter, à vérifier avant usage), avec date de dernière mise à jour affichée.
 8. Identifiants en UUID, fuseaux horaires gérés explicitement (chaque lieu porte son fuseau IANA, par exemple America/Fortaleza et America/Manaus), horaires de transport toujours en heure locale du lieu.
 
 ## 4. Modèle de données
 
-1. **Trip**, `name`, `start`, `end`, `travellers` (adultes, enfants et âges), `origin`, `homeTz` (Europe/Zurich), `homePlug` (types C et J, 230 V), `homeCurrency` (CHF), `budget` (montant total), `modes` (liste de modes avec importance de 1 à 5), `pace` (tranquille, équilibré, soutenu), `returnFeeling` (comment rentrer, voir 6.1), `mustDo` (liste), `constraints` (texte), `transports` (modes acceptés), `rules` (`maxHeavy`, `siesta`, `checkoutBy`, `minMarginMin`), `theme` (couleurs d'identité et couleurs de région, voir 10.3), `v` (version du schéma).
+1. **Trip**, `name`, `start`, `end`, `travellers` (adultes, enfants et âges), `origin` (ville de départ), `homeTz` (déduit de la ville de départ, sinon fuseau du téléphone, modifiable), `homePlug` (types C et J, 230 V), `homeCurrency` (devise du pays d'origine, EUR par défaut), `destCurrency` (devise du pays visité), `budget` (montant total pour tous les voyageurs, dans la devise d'origine), `intent` (récit du voyageur gardé mot pour mot, voir 6.1), `modes` (sept thèmes notés de 0 à 5, voir 6.2), `pace` (tranquille, équilibré, soutenu), `returnFeeling` (comment rentrer, voir 6.1), `mustDo` (liste), `constraints` (texte), `transports` (modes acceptés), `rules` (`maxHeavy`, `siesta`, `checkoutBy`, `minMarginMin`), `theme` (couleurs d'identité et couleurs de région, voir 10.3), `v` (version du schéma).
 2. **Place**, `id`, `name`, `lat`, `lng`, `tz`, `region`, `approx` (coordonnées approximatives), `kind` (hébergement, gare, aéroport, restaurant, activité, autre), `plug` (types de prise), `voltage`, avec source pour ces deux derniers champs.
 3. **Booking**, `id`, `kind`, `title`, `status` (todo, urgent, confirmed), `ref`, `tel`, `addr`, `checkIn`, `checkOut`, `from`, `to`, `date`, `time`, `placeId`, `note`, `links`, `sources`, `opDays` (jours où un vol opère), `noRoute`, `warn`, `price` (montant, devise, nature confirmé, estimé ou fourchette), `files` (billets, QR codes).
 4. **Slot**, `id`, `type` (transporte, alojamento, refeição, cultura, natureza, espectáculo, descanso, ritual), `title`, `detail`, `start`, `end`, `durationMin`, `placeId`, `bookingId`, `heavy`, `who`, `desc`, `tips`, `price`, `sources`, `origin` (utilisateur ou IA), `info` (vérifié, estimé, préconisation, proposé). L'ordre des slots dans la journée est significatif.
@@ -67,7 +67,7 @@ Trois boutons flottants sont accessibles partout pendant le voyage, « Surprise 
 L'utilisateur commence par une phrase libre, par exemple « Nous sommes deux, dix jours au Brésil en décembre avec environ 6 000 CHF, nous voulons des plages sauvages, la forêt amazonienne et rencontrer une communauté indigène ». L'IA en extrait destination, dates ou période, voyageurs, budget et devise, modes, rythme, incontournables et contraintes, puis affiche ce qu'elle a compris sous forme de fiches modifiables, chaque élément déduit étant marqué comme tel.
 
 ### 6.2 Questions d'affinage
-L'IA ne pose ensuite que les questions réellement nécessaires, par tours courts (trois questions au plus par tour, avec réponses à choix et champ libre), en commençant par ce qui change le plus le parcours. Les questions possibles portent sur les modes et leur importance de 1 à 5 (gastronomie, farniente, randonnée, culture, nature, rural et producteurs, vie locale, romantique, luxe, famille, vie nocturne, shopping), le rythme, les transports acceptés, les incontournables, les contraintes, et la question « Comment voulez‑vous rentrer de ce voyage ? » (reposés, dépaysés, cultivés, surpris, rassasiés, transformés, avec des souvenirs partagés, avec l'impression d'avoir vécu comme des locaux). Cette dernière réponse règle le moteur, par exemple « reposés » abaisse `maxHeavy` à 1 et active la sieste. L'utilisateur peut à tout moment répondre « je ne sais pas » ou « propose ».
+L'IA ne pose ensuite que les questions réellement nécessaires, par tours courts (trois questions au plus par tour, avec réponses à choix et champ libre), en commençant par ce qui change le plus le parcours. Les questions possibles portent sur les sept thèmes du voyage, chacun noté de 0 (pas pour nous) à 5 (essentiel) indépendamment des autres (gastronomie, farniente, sport et nature, culture, découverte, luxe, tradition et vie locale), une question d'arbitrage étant posée lorsque tous les thèmes sont notés au maximum, le rythme, les transports acceptés, les incontournables, les contraintes, et la question « Comment voulez‑vous rentrer de ce voyage ? » (reposés, dépaysés, cultivés, surpris, rassasiés, transformés, avec des souvenirs partagés, avec l'impression d'avoir vécu comme des locaux). Cette dernière réponse règle le moteur, par exemple « reposés » abaisse `maxHeavy` à 1 et active la sieste. L'utilisateur peut à tout moment répondre « je ne sais pas » ou « propose ».
 
 ### 6.3 Construction par étages
 1. L'IA propose une ossature (étapes, nombre de nuits, transports entre étapes), si possible en deux ou trois variantes expliquées, chacune avec ses compromis.
@@ -83,13 +83,13 @@ Le voyage au Brésil, déjà construit, est importé directement et ne passe pas
 Barre horizontale montrant tous les jours d'un coup d'œil, colorée par région selon les couleurs de région du voyage (section 10.3, pour le Brésil jaune pour le Ceará, vert pour l'Amazonie, case partagée en diagonale pour un jour de transition), avec un point rouge en cas d'erreur et un défilement vers le jour touché. Élément central à conserver.
 
 ### 7.2 Itinéraire et éditeurs
-Fiches par jour (numéro, date calculée, ville, région, note, problèmes du jour, score de sérénité), slots dépliables (description, prix avec sa nature, conseils, liens, sources avec date de vérification, bouton Modifier). Éditeur de slot et éditeur de réservation en feuille glissante depuis le bas, avec confirmation pour tout changement de jour, toute suppression, toute confirmation sans référence et tout déverrouillage.
+Fiches par jour (numéro, date calculée, ville, région, note, problèmes du jour), slots dépliables (description, prix avec sa nature, conseils, liens, sources avec date de vérification, bouton Modifier). Éditeur de slot et éditeur de réservation en feuille glissante depuis le bas, avec confirmation pour tout changement de jour, toute suppression, toute confirmation sans référence et tout déverrouillage.
 
 ### 7.3 Heure locale et écart avec la maison
 L'heure locale et l'écart avec la maison (Genève) sont affichés partout où ils comptent, en haut de l'écran Aujourd'hui (par exemple « 14h05 à Manaus · 19h05 à Genève · −5 h » en décembre), dans l'en‑tête de chaque jour, sur chaque étape de la carte, et sur chaque transport qui change de fuseau (« départ 18h30 heure de Fortaleza, arrivée 21h00 heure de Manaus, −1 h »). Un changement de fuseau dans la journée est signalé par une alerte douce la veille. Les écarts sont toujours calculés à partir des fuseaux IANA du lieu et de la maison à la date concernée, jamais saisis à la main, pour tenir compte automatiquement des changements d'heure en Europe et d'éventuels changements de règles au Brésil. Un petit outil « appeler la maison » indique si l'heure à Genève est raisonnable pour téléphoner.
 
 ### 7.4 Écran Aujourd'hui
-Heure locale du lieu et heure à la maison, météo du jour, prochaine activité et temps restant avant le prochain départ, budget disponible aujourd'hui, score de sérénité expliqué, alerte éventuelle, puis des boutons rapides, « continuer mon programme », « je suis fatigué », « il pleut », « j'ai moins de temps », « j'ai plus de temps », « bien manger », « dépenser moins ». Chaque bouton envoie à l'assistant une demande prédéfinie qui ne recalcule que le nécessaire et conserve les réservations, la réponse étant une proposition à valider.
+Heure locale du lieu et heure à la maison, météo du jour, prochaine activité et temps restant avant le prochain départ, budget disponible aujourd'hui, alertes du moteur de règles expliquées, puis des boutons rapides, « continuer mon programme », « je suis fatigué », « il pleut », « j'ai moins de temps », « j'ai plus de temps », « bien manger », « dépenser moins ». Chaque bouton envoie à l'assistant une demande prédéfinie qui ne recalcule que le nécessaire et conserve les réservations, la réponse étant une proposition à valider.
 
 ### 7.5 Humeur du jour
 Curseurs rapides (repos, découverte, gastronomie, marche, dépense), qui ne modifient que la journée en cours ou les prochaines heures, et alimentent les propositions de l'assistant et de « Surprise me ».
@@ -168,7 +168,7 @@ Champ où l'on colle le texte d'un e‑mail de confirmation, ou photo d'un bille
 ### 7.17 Exports
 Export PDF du guide jour par jour, export et import JSON complet pour sauvegarde.
 
-## 8. Moteur de règles et score de sérénité
+## 8. Moteur de règles
 
 Le moteur s'exécute à chaque modification et produit des erreurs et des avertissements.
 
@@ -183,7 +183,7 @@ Le moteur s'exécute à chaque modification et produit des erreurs et des averti
 9. Vol non confirmé avec `noRoute`, erreur, vol hors de ses `opDays`, erreur avec les jours d'opération, vol avec `warn`, avertissement.
 10. Marge inférieure à `minMarginMin` entre une arrivée et l'activité suivante, avertissement.
 
-Le score de sérénité du jour (sur 100) est dérivé de ces résultats et de la météo, toujours expliqué ligne par ligne, présenté comme un indicateur et non comme une mesure scientifique, avec un bouton « optimiser ma journée » qui demande une proposition à l'assistant.
+Aucun score de sérénité n'est calculé (décision du 10 octobre 2026), car un score global peut masquer une alerte réelle. Les erreurs et avertissements restent affichés et expliqués ligne par ligne, avec un bouton « optimiser ma journée » qui demande une proposition à l'assistant.
 
 Tests automatisés pour chaque règle. Avec les données du Brésil, le résultat attendu au démarrage est exactement deux erreurs le 20 décembre (pas de vol régulier Jericoacoara vers Fortaleza, vol Gol Fortaleza Manaus uniquement le samedi alors que le 20 est un dimanche) et trois avertissements (vols São Gabriel du 23 et du 25 à confirmer, fréquence Manaus Lisbonne à confirmer).
 
@@ -224,7 +224,7 @@ Ce sont les couleurs de structure de l'interface, indépendantes de la destinati
 6. **Signalements**, erreur avec filet et texte `#b5322a` sur fond `rgba(181,50,42,0.07)`, avertissement avec filet `#e0a815`, texte `#1a1410` et fond `rgba(224,168,21,0.10)`, point d'erreur de la barre des jours `#b5322a`, bouton SOS à fond `#b5322a` et texte `#ffffff`. Le rouge est une couleur fonctionnelle de danger, présente dans tous les voyages quel que soit le drapeau.
 
 ### 10.3 Couleurs d'identité (changent selon le voyage, d'après le drapeau du pays)
-Ce sont les couleurs d'accent et les fonds foncés, dérivées du drapeau de la destination. Pour chaque nouveau voyage, seules ces valeurs sont redéfinies, dans `Trip.theme`.
+Ce sont les couleurs d'accent et les fonds foncés, dérivées du drapeau de la destination. L'utilisateur ne les choisit pas, l'application les fixe (un thème neutre tant que la destination n'est pas connue). Pour chaque nouveau voyage, seules ces valeurs sont redéfinies, dans `Trip.theme`.
 
 1. **Fonds foncés** (en‑tête, tableaux, bandeaux, bloc météo, sections de liste de contrôle), teinte foncée du drapeau. Brésil, vert `#114027` et `#0d3d24`.
 2. **Accent vif sur fond foncé**, couleur vive du drapeau. Brésil, jaune `#e0a815`.
@@ -276,7 +276,8 @@ Stockage limité à Claude et sans synchronisation, aucun mode hors ligne, carte
 2. **Phase 2**, carte intégrée (section 7.8), heure locale et écart avec la maison (section 7.3), écran Aujourd'hui sans IA.
 3. **Phase 3**, PWA hors ligne, Supabase, synchronisation à deux comptes, déploiement Vercel. Validation, en mode avion l'app s'ouvre, affiche tout et accepte des modifications qui se synchronisent au retour du réseau.
 3 bis. **Phase 3 bis, généralisation (correction du 10 octobre 2026)**, l'application sert à n'importe quel voyage et pas seulement au Brésil. Écran d'accueil sans voyage imposé, liste des voyages et passage de l'un à l'autre, création manuelle d'un voyage (nom, dates, fuseaux, devise, couleurs), réglages du voyage dont les règles de vérification, gestion des lieux (coordonnées facultatives, lien Google Maps accepté), ajout de réservations, suppression d'un voyage propagée aux membres, synchronisation de tous les voyages du compte. Le voyage au Brésil devient un voyage d'exemple chargeable, chaque copie étant indépendante. La co‑construction par l'IA reste en phase 7.
-4. **Phase 4**, assistant (fonction serveur), boutons rapides, humeur du jour, score de sérénité et optimisation.
+3 ter. **Phase 3 ter, cahier des modifications du 10 octobre 2026**, en six étapes validées une à une. Étape 1, création d'un voyage en trois étapes (récit libre gardé mot pour mot, essentiels avec ville de départ, budget, devise d'origine et devise du pays visité, sept thèmes notés de 0 à 5), sans choix de fuseau de destination ni de couleurs. Étapes suivantes, photos, itinéraire, carte des lieux visités et budget cohérent, puis assistant.
+4. **Phase 4**, essai à l'aveugle des IA, assistant (fonction serveur), proposition complète à partir du récit, suggestions vérifiées et réservables, boutons rapides, Mood du jour et optimisation.
 5. **Phase 5**, carte postale et Surprise me (avec réserve hors ligne).
 6. **Phase 6**, budget vivant et double devise, météo, Préparer enrichi, Sécurité, Urgences et bouton SOS, Traduire. Le bouton SOS et la fiche d'urgence peuvent être avancés en phase 2 s'ils sont simples, car ils doivent exister même si le reste n'est pas terminé.
 7. **Phase 7**, co‑construction d'un nouveau voyage à partir d'une phrase, import de confirmations, exports PDF et JSON.

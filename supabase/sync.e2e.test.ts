@@ -85,7 +85,7 @@ describe("two phones sharing a trip", () => {
 });
 
 describe("several trips per account", () => {
-  const NEW = { name: "Japan", lang: "en" as const, start: "2027-04-01", end: "2027-04-03", adults: 2, children: [], origin: "Geneva", homeTz: "Europe/Paris", homeCurrency: "EUR", destTz: "Asia/Tokyo", themeKey: "neutral" };
+  const NEW = { name: "Japan", lang: "en" as const, start: "2027-04-01", end: "2027-04-03", adults: 2, children: [], origin: "Geneva", homeTz: "Europe/Paris", homeCurrency: "EUR", destCurrency: "JPY", budget: 3000, intent: "Deux semaines au Japon, temples et onsen.", modes: { culture: 5, relaxation: 3 } };
 
   it("a new trip stays private until its owner invites someone", async () => {
     const japan = await createTrip(NEW, A);
