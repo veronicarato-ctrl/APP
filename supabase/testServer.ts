@@ -2,6 +2,7 @@
 import { PGlite } from "@electric-sql/pglite";
 import { readFileSync } from "node:fs";
 import type { Transport, WireRow } from "../src/sync/engine";
+import type { CloudApi } from "../src/sync/multi";
 
 const SQL = readFileSync(new URL("./migrations/0001_sync.sql", import.meta.url), "utf8");
 const STORAGE_SQL = readFileSync(new URL("./migrations/0002_storage.sql", import.meta.url), "utf8");
@@ -44,5 +45,11 @@ export async function startServer() {
       as<WireRow>(u, "select kind, id, data, field_ts, rev from records where trip_id = $1 and rev > $2 order by rev limit $3", [tripId, sinceRev, limit]),
     push: (tripId, rows) => as<WireRow>(u, "select kind, id, data, field_ts, rev from push_records($1, $2::jsonb)", [tripId, JSON.stringify(rows)]),
   });
-  return { pg, as, transport };
+  const api = (u: User): CloudApi => ({
+    ...transport(u),
+    myTrips: async () => (await as<{ trip_id: string }>(u, "select trip_id from trip_members where user_id = $1", [u.id])).map((r) => r.trip_id),
+    claim: async (tripId) => (await as<{ claim_trip: "owner" | "member" | "forbidden" }>(u, "select claim_trip($1)", [tripId]))[0].claim_trip,
+    acceptInvites: async () => { await as(u, "select accept_invites()"); },
+  });
+  return { pg, as, transport, api };
 }

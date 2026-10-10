@@ -3,7 +3,7 @@
 
 export type ISODate = string; // YYYY-MM-DD
 export type HHMM = string; // 24h local time of the place, "" when unknown
-export type Lang = "pt" | "en" | "fr";
+export type Lang = "en" | "fr" | "es" | "pt" | "zh";
 
 /** Free text that keeps the language it was written in (imported data is never auto-translated). */
 export interface Text {
@@ -43,8 +43,9 @@ export interface Place {
   id: string;
   key: string;
   name: Text;
-  lat: number;
-  lng: number;
+  /** Coordinates are optional: a place can be added before its exact position is known. */
+  lat?: number;
+  lng?: number;
   tz: string; // IANA zone
   region: string; // Region.id
   approx: boolean;
@@ -194,6 +195,8 @@ export interface Trip {
   rules: TripRules;
   regions: Region[];
   theme: TripTheme;
+  /** Default zone for new places of this trip (IANA). */
+  destTz?: string;
   prepNote?: Text;
   v: number;
 }

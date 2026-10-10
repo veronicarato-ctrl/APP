@@ -11,6 +11,6 @@ i18n.use(initReactI18next).init({
   interpolation: { escapeValue: false },
 });
 
-export const LANG_NAMES: Record<string, string> = { pt: "Portuguese", en: "English", fr: "French" };
+export const LANG_NAMES: Record<string, string> = { en: "English", fr: "French", es: "Spanish", pt: "Portuguese", zh: "Chinese" };
 
 export default i18n;

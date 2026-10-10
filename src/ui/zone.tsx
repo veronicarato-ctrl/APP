@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { homeName } from "./format";
 import { dayPath, transportEnds, tzChange } from "../engine/derive";
 import { addDays } from "../lib/dates";
 import { diffOnDate, fmtDiff, fmtUtc, tzOffsetMin, zonedInstant } from "../lib/time";
@@ -15,7 +16,7 @@ export function DayZone({ s, date }: { s: TripState; date: ISODate }) {
   if (!zones.length) return null;
   return (
     <p className="text-[11.5px] text-soft tabular-nums">
-      {zones.map((tz) => t("time.dayZone", { utc: utcOn(tz, date), diff: fmtDiff(diffOnDate(tz, s.trip.homeTz, date)), homeName: s.trip.origin.text })).join(" → ")}
+      {zones.map((tz) => t("time.dayZone", { utc: utcOn(tz, date), diff: fmtDiff(diffOnDate(tz, s.trip.homeTz, date)), homeName: homeName(s) })).join(" → ")}
     </p>
   );
 }

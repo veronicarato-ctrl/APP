@@ -6,13 +6,15 @@ import type { ISODate, TripState } from "../model/types";
 import { fmtDay, fmtDayLong } from "./format";
 import { Button, Card, IssueBox, SectionLabel, Sources, T } from "./primitives";
 import { Conflicts, SyncPage } from "./SyncPage";
+import { PlacesPage } from "./Places";
 import { useCloudStatus } from "../sync/cloud";
 
-export type PracticalPage = "lodging" | "transport" | "bookings" | "prepare" | "verification" | "sync";
+export type PracticalPage = "lodging" | "transport" | "bookings" | "places" | "prepare" | "verification" | "sync";
 const LATER: Record<string, number> = { budget: 6, safety: 6, emergency: 6, translate: 6 };
 
 interface Actions {
-  openBooking: (id: string) => void;
+  openBooking: (id: string | null) => void;
+  openSettings: () => void;
   goToDay: (d: ISODate) => void;
   toggleCheck: (id: string) => void;
   addCheck: (text: string) => void;
@@ -25,10 +27,11 @@ export function Practical({ s, issues, page, setPage, actions }: { s: TripState;
     return (
       <div>
         <button onClick={() => setPage(null)} className="min-h-11 text-sm font-semibold text-label mb-1">‹ {t("practical.back")}</button>
-        <h2 className="text-xl font-bold mb-3">{page === "sync" ? t("sync.title") : t(`practical.${page}`)}</h2>
+        <h2 className="text-xl font-bold mb-3">{page === "sync" ? t("sync.title") : page === "places" ? t("places.title") : t(`practical.${page}`)}</h2>
         {page === "lodging" && <Lodging s={s} openBooking={actions.openBooking} />}
         {page === "transport" && <Transport s={s} openBooking={actions.openBooking} />}
         {page === "bookings" && <Bookings s={s} openBooking={actions.openBooking} />}
+        {page === "places" && <PlacesPage s={s} />}
         {page === "prepare" && <Prepare s={s} />}
         {page === "verification" && <Verification s={s} issues={issues} actions={actions} />}
         {page === "sync" && <SyncPage />}
@@ -50,6 +53,8 @@ export function Practical({ s, issues, page, setPage, actions }: { s: TripState;
     ["emergency", ""],
     ["translate", ""],
     ["verification", t("practical.verificationSummary", { errors, warnings: issues.length - errors }), errors > 0],
+    ["places", t("places.summary", { count: Object.keys(s.places).length })],
+    ["settings", t("practical.settingsSummary")],
     ["sync", t(`sync.tileSummary_${cloud.phase}`) + (cloud.pending && cloud.phase !== "local" ? ` · ${t("sync.pending", { count: cloud.pending })}` : ""), ["unreachable", "forbidden", "error"].includes(cloud.phase)],
   ];
   return (
@@ -59,10 +64,10 @@ export function Practical({ s, issues, page, setPage, actions }: { s: TripState;
         {tiles.map(([k, summary, alert]) => {
           const later = LATER[k];
           return (
-            <button key={k} disabled={!!later} onClick={() => setPage(k as PracticalPage)}
+            <button key={k} disabled={!!later} onClick={() => (k === "settings" ? actions.openSettings() : setPage(k as PracticalPage))}
               className="text-left rounded-[14px] p-3.5 min-h-24 flex flex-col justify-between disabled:opacity-55"
               style={{ background: "var(--id-dark)", color: "var(--on-dark-title)" }}>
-              <span className="text-[15px] font-bold">{k === "sync" ? t("sync.title") : t(`practical.${k}`)}</span>
+              <span className="text-[15px] font-bold">{k === "sync" ? t("sync.title") : k === "places" ? t("places.title") : t(`practical.${k}`)}</span>
               <span className="text-[12px] mt-2" style={{ color: alert ? "var(--id-accent)" : "var(--on-dark)" }}>
                 {later ? t("common.comingIn", { phase: later }) : summary}
               </span>
@@ -100,8 +105,8 @@ function Search({ s, actions }: { s: TripState; actions: Actions }) {
             </button>
           ))}
           {places.map((p) => (
-            <a key={p.id} href={`https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}`} target="_blank" rel="noopener noreferrer" className="block px-3 py-2 min-h-11">
-              <T v={p.name} /><span className="text-soft text-xs block">{p.lat}, {p.lng}</span>
+            <a key={p.id} href={`https://www.google.com/maps/search/?api=1&query=${typeof p.lat === "number" ? `${p.lat},${p.lng}` : encodeURIComponent(p.name.text)}`} target="_blank" rel="noopener noreferrer" className="block px-3 py-2 min-h-11">
+              <T v={p.name} /><span className="text-soft text-xs block">{typeof p.lat === "number" ? `${p.lat}, ${p.lng}` : t("map.noCoords")}</span>
             </a>
           ))}
         </Card>
@@ -186,14 +191,16 @@ function Transport({ s, openBooking }: { s: TripState; openBooking: (id: string)
   );
 }
 
-function Bookings({ s, openBooking }: { s: TripState; openBooking: (id: string) => void }) {
+function Bookings({ s, openBooking }: { s: TripState; openBooking: (id: string | null) => void }) {
   const { t } = useTranslation();
   const done = s.bookings.filter((b) => b.status === "confirmed").length, total = s.bookings.length;
+  const pct = total ? Math.round((done / total) * 100) : 0;
   return (
     <>
+      <Button className="mb-3" onClick={() => openBooking(null)}>+ {t("bookings.add")}</Button>
       <Card className="p-3.5 mb-4">
-        <div className="flex justify-between mb-2 text-sm"><strong>{t("bookings.progress", { done, total })}</strong><span>{Math.round((done / total) * 100)}%</span></div>
-        <div className="h-2 rounded-full overflow-hidden" style={{ background: "var(--line)" }}><div className="h-full" style={{ width: `${(done / total) * 100}%`, background: "var(--ok)" }} /></div>
+        <div className="flex justify-between mb-2 text-sm"><strong>{t("bookings.progress", { done, total })}</strong><span>{pct}%</span></div>
+        <div className="h-2 rounded-full overflow-hidden" style={{ background: "var(--line)" }}><div className="h-full" style={{ width: `${pct}%`, background: "var(--ok)" }} /></div>
       </Card>
       {(["urgent", "todo", "confirmed"] as const).map((st) => {
         const list = s.bookings.filter((b) => b.status === st);

@@ -2,7 +2,11 @@ import { useTranslation } from "react-i18next";
 import type { Issue } from "../engine/rules";
 import { formatDay, weekdayName } from "../lib/dates";
 import { LOCALE } from "../i18n";
-import type { ISODate } from "../model/types";
+import type { ISODate, TripState } from "../model/types";
+import { tzCity } from "../lib/time";
+
+/** Name used for "home" in time comparisons: the departure city, else the home time zone city. */
+export const homeName = (s: TripState) => s.trip.origin.text.trim() || tzCity(s.trip.homeTz);
 
 export const fmtDay = (d: ISODate) => formatDay(d, LOCALE);
 export const fmtDayLong = (d: ISODate) => formatDay(d, LOCALE, { weekday: "long", month: "long" });

@@ -6,8 +6,9 @@ import { TILE_ATTRIBUTION, TILE_MAX_ZOOM, TILE_URL } from "../config";
 import { dayPath, dayTimeSplit, route } from "../engine/derive";
 import { diffOnDate, fmtDiff, fmtUtc, tzOffsetMin } from "../lib/time";
 import type { ISODate, Place, Slot, SlotType, TripState } from "../model/types";
-import { fmtDay } from "./format";
+import { fmtDay, homeName } from "./format";
 import { Card, SectionLabel, T } from "./primitives";
+import { regionColor } from "./regions";
 
 export type Layer = "lodging" | "transport" | "activities" | "restaurants" | "ai";
 const LAYERS: Layer[] = ["lodging", "transport", "activities", "restaurants", "ai"];
@@ -16,10 +17,11 @@ export const layerOf = (x: Slot): Layer =>
   x.origin === "ai" ? "ai" : x.type === "lodging" ? "lodging" : x.type === "transport" ? "transport" : x.type === "meal" ? "restaurants" : "activities";
 
 const hours = (min: number) => `${Math.floor(min / 60)} h${min % 60 ? " " + String(min % 60).padStart(2, "0") : ""}`;
-const directions = (p: Place) => ({
-  google: `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`,
-  apple: `https://maps.apple.com/?daddr=${p.lat},${p.lng}`,
-});
+export const located = (p: Place) => typeof p.lat === "number" && typeof p.lng === "number";
+const directions = (p: Place) => {
+  const dest = located(p) ? `${p.lat},${p.lng}` : encodeURIComponent(p.name.text);
+  return { google: `https://www.google.com/maps/dir/?api=1&destination=${dest}`, apple: `https://maps.apple.com/?daddr=${dest}` };
+};
 
 export function MapView({ s, date, setDate, goToDay }: { s: TripState; date?: ISODate; setDate: (d?: ISODate) => void; goToDay: (d: ISODate) => void }) {
   const { t } = useTranslation();
@@ -58,7 +60,7 @@ export function MapView({ s, date, setDate, goToDay }: { s: TripState; date?: IS
   // Create the map once.
   useEffect(() => {
     if (!el.current || map.current) return;
-    const m = L.map(el.current, { zoomControl: true, attributionControl: true });
+    const m = L.map(el.current, { zoomControl: true, attributionControl: true }).setView([20, 0], 2);
     const tiles = L.tileLayer(TILE_URL, { maxZoom: TILE_MAX_ZOOM, attribution: TILE_ATTRIBUTION });
     tiles.on("tileerror", () => setTilesFailed(true));
     tiles.on("tileload", () => setTilesFailed(false));
@@ -76,19 +78,21 @@ export function MapView({ s, date, setDate, goToDay }: { s: TripState; date?: IS
     // Leaflet writes the colour as an SVG attribute, so resolve the region token to its value first.
     const css = getComputedStyle(document.documentElement);
     for (const seg of segments) {
-      const color = css.getPropertyValue(`--region-${seg.to.region}-on-light`).trim() || css.getPropertyValue("--soft").trim();
-      L.polyline([[seg.from.lat, seg.from.lng], [seg.to.lat, seg.to.lng]], { color, weight: 4, opacity: 0.9, dashArray: seg.to.approx || seg.from.approx ? "6 6" : undefined }).addTo(g);
+      if (!located(seg.from) || !located(seg.to)) continue;
+      const color = css.getPropertyValue(`--region-${seg.to.region}-on-light`).trim() || css.getPropertyValue("--id-accent-on-light").trim();
+      L.polyline([[seg.from.lat!, seg.from.lng!], [seg.to.lat!, seg.to.lng!]], { color, weight: 4, opacity: 0.9, dashArray: seg.to.approx || seg.from.approx ? "6 6" : undefined }).addTo(g);
     }
     const pts: L.LatLngExpression[] = [];
     for (const id of visible) {
       const p = s.places[id];
-      pts.push([p.lat, p.lng]);
+      if (!located(p)) continue;
+      pts.push([p.lat!, p.lng!]);
       const icon = L.divIcon({
         className: "",
-        html: `<span class="stop${selected === id ? " stop-sel" : ""}" style="background:var(--region-${p.region}-on-light)">${numberOf(id) ?? ""}</span>`,
+        html: `<span class="stop${selected === id ? " stop-sel" : ""}" style="background:${regionColor(p.region)}">${numberOf(id) ?? ""}</span>`,
         iconSize: [30, 30], iconAnchor: [15, 15],
       });
-      L.marker([p.lat, p.lng], { icon, title: p.name.text, keyboard: true }).on("click", () => setSelected(id)).addTo(g);
+      L.marker([p.lat!, p.lng!], { icon, title: p.name.text, keyboard: true }).on("click", () => setSelected(id)).addTo(g);
     }
     if (pts.length) m.fitBounds(L.latLngBounds(pts), { padding: [36, 36], maxZoom: date ? 11 : 7 });
   }, [s, date, visible, selected]);
@@ -119,6 +123,7 @@ export function MapView({ s, date, setDate, goToDay }: { s: TripState; date?: IS
         })}
       </div>
 
+      {!Object.values(s.places).some(located) && <p className="mb-2 text-[13px] text-soft">{t("map.empty")}</p>}
       {offline && <p role="status" className="mb-2 text-[12.5px] px-3 py-1.5 rounded-md" style={{ background: "var(--warn-bg)", borderLeft: "3px solid var(--warn)", color: "var(--warn-ink)" }}>{t("map.offline")}</p>}
 
       <div ref={el} className="w-full h-[52vh] min-h-72 rounded-[14px] border border-line overflow-hidden z-0" style={{ background: "var(--other-bg)" }} />
@@ -140,10 +145,10 @@ export function MapView({ s, date, setDate, goToDay }: { s: TripState; date?: IS
             return (
               <button key={id} onClick={() => setSelected(id)} className="text-left">
                 <Card className="px-3.5 py-2.5 flex gap-3 items-center">
-                  <span className="stop" style={{ background: `var(--region-${p.region}-on-light)` }}>{numberOf(id)}</span>
+                  <span className="stop" style={{ background: regionColor(p.region) }}>{numberOf(id)}</span>
                   <span className="flex-1">
                     <strong><T v={p.name} /></strong>
-                    <span className="block text-[12px] text-soft tabular-nums">{p.lat}, {p.lng}{p.approx ? ` · ${t("map.approx")}` : ""}</span>
+                    <span className="block text-[12px] text-soft tabular-nums">{located(p) ? `${p.lat}, ${p.lng}` : t("map.noCoords")}{p.approx ? ` · ${t("map.approx")}` : ""}</span>
                   </span>
                 </Card>
               </button>
@@ -162,12 +167,12 @@ function PlaceCard({ s, place, n, date, items, goToDay }: { s: TripState; place:
   const dir = directions(place);
   const typeColor = (ty: SlotType) => `var(--${ty}-tx)`;
   return (
-    <Card className="mt-3 p-3.5" topColor={`var(--region-${place.region}-on-light)`}>
+    <Card className="mt-3 p-3.5" topColor={regionColor(place.region)}>
       <div className="flex gap-3 items-start">
-        <span className="stop" style={{ background: `var(--region-${place.region}-on-light)` }}>{n}</span>
+        <span className="stop" style={{ background: regionColor(place.region) }}>{n}</span>
         <div className="flex-1">
           <h3 className="font-bold"><T v={place.name} /></h3>
-          <p className="text-[12px] text-soft">{t("time.dayZone", { utc: fmtUtc(off), diff: fmtDiff(diffOnDate(place.tz, s.trip.homeTz, d)), homeName: s.trip.origin.text })}</p>
+          <p className="text-[12px] text-soft">{t("time.dayZone", { utc: fmtUtc(off), diff: fmtDiff(diffOnDate(place.tz, s.trip.homeTz, d)), homeName: homeName(s) })}</p>
           {place.approx && <p className="text-[12px] font-semibold" style={{ color: "var(--warn-ink)" }}>⚠ {t("map.approx")}</p>}
         </div>
       </div>

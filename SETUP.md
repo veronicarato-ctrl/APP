@@ -21,7 +21,7 @@ Ce guide se suit dans l'ordre, une seule fois. Aucune clé n'est à coller dans 
 ## 3. Sur les deux téléphones
 
 1. Ouvrir l'adresse Vercel dans Safari (iPhone) ou Chrome (Android), puis choisir « Partager » et « Sur l'écran d'accueil » (iPhone) ou « Installer l'application » (Android).
-2. Dans l'application, ouvrir « Practical » puis « Sync and sharing », saisir son adresse e‑mail et un mot de passe d'au moins huit caractères, puis toucher « Create account ». Ouvrir l'e‑mail de confirmation reçu, cliquer sur le lien, revenir dans l'application et toucher « Sign in ». Le premier compte connecté devient propriétaire du voyage.
+2. Au premier lancement, l'application propose « Create a trip » ou « Add the Brazil 2026 example trip ». Pour le voyage de décembre, la première personne choisit l'exemple Brésil. La seconde personne ne charge rien, elle reçoit le voyage par invitation. Ensuite, dans l'application, ouvrir « Practical » puis « Sync and sharing », saisir son adresse e‑mail et un mot de passe d'au moins huit caractères, puis toucher « Create account ». Ouvrir l'e‑mail de confirmation reçu, cliquer sur le lien, revenir dans l'application et toucher « Sign in ». Le premier compte connecté devient propriétaire du voyage.
 3. Toujours dans « Sync and sharing », inviter l'adresse e‑mail de la seconde personne. Celle‑ci installe l'application sur son téléphone, crée son compte avec cette même adresse de la même manière, se connecte et reçoit le voyage.
 
 ## 4. Si la synchronisation affiche « Server unreachable »

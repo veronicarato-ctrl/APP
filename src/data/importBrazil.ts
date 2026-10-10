@@ -66,10 +66,14 @@ const SOURCES_CHECKED_AT = "2026-10";
 const pt = (text: string): Text => ({ text, lang: "pt" });
 const ptOpt = (text: string | undefined): Text | undefined => (text ? pt(text) : undefined);
 
-export function importBrazil(data: RawPrototype = PROTOTYPE): TripState {
+/**
+ * `scope` salts the generated UUIDs. The default keeps the historical ids; loading the example
+ * as a new trip passes a fresh scope so every copy is an independent trip.
+ */
+export function importBrazil(data: RawPrototype = PROTOTYPE, scope: string = BRAZIL_TRIP_KEY): TripState {
   const { seed } = data;
-  const tripId = importId(BRAZIL_TRIP_KEY, "trip", BRAZIL_TRIP_KEY);
-  const id = (kind: string, key: string) => importId(BRAZIL_TRIP_KEY, kind, key);
+  const tripId = importId(scope, "trip", BRAZIL_TRIP_KEY);
+  const id = (kind: string, key: string) => importId(scope, kind, key);
   const placeId = (k: string) => (k ? id("place", k) : undefined);
   const bookingId = (k: string) => (k ? id("booking", k) : undefined);
   const sourceIds = (keys?: string[]) => (keys ? keys.map((k) => id("source", k)) : undefined);
@@ -174,6 +178,7 @@ export function importBrazil(data: RawPrototype = PROTOTYPE): TripState {
         },
       },
       prepNote: pt(data.prepNote),
+      destTz: "America/Fortaleza",
       v: seed.v,
     },
     places,

@@ -13,7 +13,7 @@ function toPrototype(s: TripState): Omit<RawSeed, "trip" | "v" | "log"> {
   const srcKeys = (ids?: string[]) => ids?.map((i) => s.sources[i].key);
   const strip = <T extends object>(o: T) => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined)) as T;
   return {
-    places: Object.fromEntries(Object.values(s.places).map((p) => [p.key, strip({ n: p.name.text, lat: p.lat, lng: p.lng, r: p.region, ap: p.approx ? 1 : undefined })])),
+    places: Object.fromEntries(Object.values(s.places).map((p) => [p.key, strip({ n: p.name.text, lat: p.lat!, lng: p.lng!, r: p.region, ap: p.approx ? 1 : undefined })])),
     bookings: s.bookings.map((b) => strip({
       id: b.key, k: kind[b.kind], t: b.title.text, status: b.status, ref: b.ref, tel: b.tel, addr: b.addr,
       ci: b.checkIn, co: b.checkOut, note: b.note?.text ?? "", from: b.from, to: b.to, date: b.date,
