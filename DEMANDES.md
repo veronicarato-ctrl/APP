@@ -34,3 +34,12 @@ Sept catégories avec une jauge en pourcentage chacune, enregistrées dans `Trip
 ### 8. Couleurs et photos pour donner envie
 « Le mieux c'est de mettre des couleurs, des photos. Au début, tu ne pourras pas mettre des photos en fonction du pays ou du voyage choisi, mais on peut mettre des photos de paysages connus pour donner envie. Après, quand le voyage est configuré, paramétré, on pourra allier des photos au voyage demandé. »
 Écran d'accueil et formulaire illustrés de photos de paysages célèbres, puis, une fois le voyage paramétré, des photos liées à sa destination. Points à trancher, la provenance des photos, qui doivent avoir une licence permettant l'usage commercial prévu en phase 8 avec le crédit de l'auteur, et leur poids, l'application devant rester rapide et utilisable hors ligne.
+
+## Demande du 10 octobre 2026, génération d'une proposition
+
+### 9. Une proposition doit sortir dès la saisie des envies
+« Je viens de rentrer les premières informations par rapport au voyage. Rien ne sort, il n'y a aucune proposition. Il n'y a pas assez d'informations qui sont demandées au tout début. Le but, c'est qu'on mette un prompt IA dicté par l'utilisateur qui définit où il veut aller, dans quel pays, quel type de voyage il veut avoir. Il va falloir changer assez rapidement, mais pas encore. »
+La version actuelle (phases 1 à 3) ne contient pas encore d'assistant, elle range et vérifie un voyage saisi à la main. La génération d'une proposition à partir du texte libre et des thèmes correspond à la phase 4 (SPEC sections 6 et 8), qui demande un compte Anthropic et une clé gardée côté serveur, jamais dans l'application. À faire en priorité au démarrage de la phase 4, avec le formulaire enrichi des points 1 à 8 et les questions d'affinage de la SPEC section 6.2.
+
+### Recommandation sur la mesure des thèmes (point 7)
+Recommandation de Claude, en attente de décision, une note de 0 à 5 par thème plutôt que des pourcentages. Les pourcentages obligent à faire un calcul et à retirer d'un thème ce qu'on donne à un autre, alors qu'un voyageur peut vouloir à la fois beaucoup de luxe et beaucoup de gastronomie. La note indépendante reste simple sur un téléphone, et l'assistant peut ensuite en tirer des proportions.
