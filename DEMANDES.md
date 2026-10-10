@@ -88,3 +88,8 @@ Défauts visibles à ne pas reproduire.
 1. Le budget de 2 000 EUR donné par l'utilisateur est ignoré, la proposition coûte 3 253 EUR, soit 63 % de plus, et l'écran Budget prend l'estimation comme « total prévu » au lieu du budget voulu. Dans la SPEC, le budget passe avant les préférences (principe 7), l'assistant doit donc proposer dans le budget ou expliquer pourquoi c'est impossible et proposer des arbitrages.
 2. Taux affiché « 1 EUR ≈ 1.000 EUR », sans intérêt quand la devise est la même, avec un point décimal au lieu d'une virgule.
 3. Météo, événements et taux de change simulés. Même annoncées, des données inventées sont exclues par la SPEC (principe 6), une donnée sans source reste vide.
+
+### Capture complémentaire, création d'un voyage
+Écran « Nouveau voyage » en quatre étapes signalées par une barre de progression. L'étape 1 « Intention » affiche le titre « Raconte-nous ton voyage. », le texte « Une phrase suffit. L'IA extrait tout, destination, dates, budget, envies. », un grand champ libre, puis une rubrique « Besoin d'inspiration ? » avec trois exemples de phrases (Italie à deux avec 4 000 €, week-end romantique à Lisbonne, deux semaines en famille au Japon avec enfants de 8 et 11 ans).
+
+C'est la forme attendue pour le point 4 (zone libre pour dicter ses envies) et pour la SPEC section 6.1. À reprendre, le parcours en étapes avec barre de progression, la phrase libre en premier, et des exemples d'inspiration qui montrent quoi écrire (voyageurs, durée, période, budget, envies, incontournables). Les trois étapes suivantes ne figurent pas sur les captures.
