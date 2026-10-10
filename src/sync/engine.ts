@@ -2,7 +2,7 @@
 // reached only when there is a network and a signed-in account. Every local edit is stamped per
 // field, so changes made in airplane mode are sent later and merged field by field.
 import { db as defaultDb, type Conflict, type SyncMeta, type TravelDB } from "../db/db";
-import { loadState, replaceTrip } from "../db/repo";
+import { loadState, removeTripLocal, replaceTrip } from "../db/repo";
 import { newId } from "../lib/ids";
 import { changedFields, mergeLww, nextTick, type FieldTs } from "./merge";
 import { DELETED, explode, implode, recKey, type Data, type Kind, type Rec } from "./records";
@@ -28,18 +28,19 @@ async function state(d: TravelDB, tripId: string) {
  * `baseline` stamps with 0, so seeded data never overrides anything already on the server.
  */
 export async function recordLocalChanges(tripId: string, opts: { baseline?: boolean } = {}, d: TravelDB = defaultDb) {
+  // A trip deleted on this phone has no state: every known record is then stamped as deleted.
   const s = await loadState(tripId, d);
-  if (!s) return 0;
   return d.transaction("rw", [d.syncMeta, d.syncState], async () => {
     const metas = new Map((await d.syncMeta.where({ tripId }).toArray()).map((m) => [m.key, m]));
+    if (!s && metas.size === 0) return 0;
     const st = await state(d, tripId);
-    const baseline = opts.baseline || metas.size === 0;
+    const baseline = opts.baseline || (metas.size === 0 && !!s);
     let clock = st.clock;
     const tick = () => (baseline ? 0 : (clock = nextTick(clock)));
     const changed: SyncMeta[] = [];
     const seen = new Set<string>();
 
-    for (const r of explode(s)) {
+    for (const r of s ? explode(s) : []) {
       const key = metaKey(tripId, r.kind, r.id);
       seen.add(key);
       const m = metas.get(key);
@@ -105,7 +106,9 @@ export async function applyRemote(tripId: string, rows: WireRow[], d: TravelDB =
 
     // Rebuild the trip from all known records and replace the local copy.
     const recs: Rec[] = [...metas.values()].map((m) => ({ kind: m.kind, id: m.id, data: m.shadow }));
-    if (recs.some((r) => r.kind === "trip" && !r.data[DELETED])) await replaceTrip(tripId, implode(recs), d);
+    const tripRec = recs.find((r) => r.kind === "trip");
+    if (tripRec && !tripRec.data[DELETED]) await replaceTrip(tripId, implode(recs), d);
+    else if (tripRec) await removeTripLocal(tripId, d); // deleted by another member
     await d.syncMeta.bulkPut([...metas.values()]);
     if (conflicts.length) await d.conflicts.bulkPut(conflicts);
     await d.syncState.put({ ...st, clock });

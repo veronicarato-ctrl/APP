@@ -47,3 +47,17 @@ describe("colour contrast, dark theme", () => {
   for (const [fg, bg] of pairs) it(`${fg} on ${bg}`, () => expect(ratio(dark, fg, bg)).toBeGreaterThanOrEqual(4.5));
   it("label on card", () => expect(ratio(dark, "label", "card")).toBeGreaterThanOrEqual(4.5));
 });
+
+import { THEMES } from "../data/themes";
+
+describe("colour contrast, identity presets", () => {
+  for (const [key, th] of Object.entries(THEMES)) {
+    const env = { ...light, "id-dark": th.dark, "id-darker": th.darker, "id-accent": th.accent, "id-accent-on-light": th.accentOnLight };
+    it(`${key}: accent and light text on the dark colours`, () => {
+      expect(ratio(env, "id-accent", "id-dark")).toBeGreaterThanOrEqual(4.5);
+      expect(ratio(env, "id-accent", "id-darker")).toBeGreaterThanOrEqual(4.5);
+      expect(ratio(env, "on-dark", "id-dark")).toBeGreaterThanOrEqual(4.5);
+    });
+    it(`${key}: accent on white reaches at least the large-text level`, () => expect(ratio(env, "id-accent-on-light", "card")).toBeGreaterThanOrEqual(3));
+  }
+});

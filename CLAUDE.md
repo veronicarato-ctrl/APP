@@ -54,7 +54,8 @@ Read `SPEC.md` (French, the product specification) before any change. The refere
 
 ## Roadmap
 
-- Phases 1 to 7 are the personal version for the December 2026 Brazil trip. Commercialisation is phase 8,
+- The app is general-purpose: any trip, several trips per account. Brazil 2026 is only the first real test
+  and a loadable example trip (`loadExampleTrip`), never hard-wired. Phases 1 to 7 are the personal version tested on it. Commercialisation is phase 8,
   after the trip (SPEC section 16). Do not start phase 8 work before then, but never make a choice in
   phases 1 to 7 that would block it (i18n, data outside code, per-trip theme, UUIDs).
 - Target UI languages for phase 8: en, fr, es, pt (pt-PT first), zh. All UI text must go through i18n.

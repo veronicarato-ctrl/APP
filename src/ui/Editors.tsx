@@ -4,7 +4,7 @@ import { bookingMap, isLocked } from "../engine/rules";
 import { dateRange } from "../lib/dates";
 import { newId } from "../lib/ids";
 import { LANG_NAMES } from "../i18n";
-import type { Booking, BookingStatus, ISODate, Lang, Slot, SlotType, Text, TripState } from "../model/types";
+import type { Booking, BookingKind, BookingStatus, ISODate, Lang, Slot, SlotType, Text, TripState } from "../model/types";
 import { fmtDay } from "./format";
 import { Button, Field, Sheet } from "./primitives";
 import { keepFiles, openFile } from "../sync/files";
@@ -92,9 +92,15 @@ export function SlotEditor({ s, date, id, onSave, onDelete, onClose }: {
   );
 }
 
-export function BookingEditor({ s, id, onSave, onClose }: { s: TripState; id: string; onSave: (b: Booking) => void; onClose: () => void }) {
+const KINDS: BookingKind[] = ["lodging", "flight", "transfer", "contact", "permit", "fee", "other"];
+
+/** Edits a booking, or creates one when id is null. */
+export function BookingEditor({ s, id, onSave, onClose }: { s: TripState; id: string | null; onSave: (b: Booking) => void; onClose: () => void }) {
   const { t } = useTranslation();
-  const orig = s.bookings.find((b) => b.id === id)!;
+  const orig: Booking = (id && s.bookings.find((b) => b.id === id)) || {
+    id: newId(), key: "", kind: "lodging", title: { text: "", lang: s.trip.name.lang }, status: "todo",
+    ref: "", tel: "", addr: "", checkIn: "", checkOut: "", from: s.trip.start, to: s.trip.end,
+  };
   const [b, setB] = useState<Booking>(orig);
   const [added, setAdded] = useState<File[]>([]);
   const [missing, setMissing] = useState<string>();
@@ -110,7 +116,34 @@ export function BookingEditor({ s, id, onSave, onClose }: { s: TripState; id: st
   const kb = (n: number) => (n > 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} kB`);
 
   return (
-    <Sheet title={<span lang={orig.title.lang}>{orig.title.text}</span>} subtitle={`${t(`kind.${orig.kind}`)}${when ? " · " + when : ""}`} onClose={onClose}>
+    <Sheet title={id ? <span lang={orig.title.lang}>{orig.title.text}</span> : t("bookings.add")} subtitle={id ? `${t(`kind.${orig.kind}`)}${when ? " · " + when : ""}` : undefined} onClose={onClose}>
+      <div className="grid grid-cols-2 gap-3">
+        <Field label={t("bookings.kind")}>
+          <select className="field" value={b.kind} onChange={(e) => {
+            const kind = e.target.value as BookingKind;
+            upd(kind === "lodging" ? { kind, from: b.from ?? b.date ?? s.trip.start, to: b.to ?? s.trip.end, date: undefined } : { kind, date: b.date ?? b.from ?? s.trip.start, from: undefined, to: undefined });
+          }}>
+            {KINDS.map((k) => <option key={k} value={k}>{t(`kind.${k}`)}</option>)}
+          </select>
+        </Field>
+        <Field label={t("bookings.place")}>
+          <select className="field" value={b.placeId ?? ""} onChange={(e) => upd({ placeId: e.target.value || undefined })}>
+            <option value="">{t("common.none")}</option>
+            {Object.values(s.places).map((p) => <option key={p.id} value={p.id}>{p.name.text}</option>)}
+          </select>
+        </Field>
+        {b.kind === "lodging" ? (
+          <>
+            <Field label={t("bookings.from")}><input className="field" type="date" min={s.trip.start} max={s.trip.end} value={b.from ?? ""} onChange={(e) => upd({ from: e.target.value })} /></Field>
+            <Field label={t("bookings.to")}><input className="field" type="date" min={s.trip.start} max={s.trip.end} value={b.to ?? ""} onChange={(e) => upd({ to: e.target.value })} /></Field>
+          </>
+        ) : (
+          <>
+            <Field label={t("bookings.date")}><input className="field" type="date" value={b.date ?? ""} onChange={(e) => upd({ date: e.target.value || undefined })} /></Field>
+            <Field label={t("bookings.time")}><input className="field" type="time" value={b.time ?? ""} onChange={(e) => upd({ time: e.target.value || undefined })} /></Field>
+          </>
+        )}
+      </div>
       <Field label={t("bookingEditor.status")}>
         <select className="field" value={b.status} onChange={(e) => upd({ status: e.target.value as BookingStatus })}>
           {STATUSES.map((k) => <option key={k} value={k}>{t(`status.${k}`)}</option>)}
@@ -155,7 +188,7 @@ export function BookingEditor({ s, id, onSave, onClose }: { s: TripState; id: st
       </div>
       <div className="flex justify-end gap-2 mt-2">
         <Button variant="ghost" onClick={onClose}>{t("common.cancel")}</Button>
-        <Button onClick={save}>{t("common.save")}</Button>
+        <Button disabled={!b.title.text.trim() || (b.kind === "lodging" && (!b.from || !b.to || b.to <= b.from))} onClick={save}>{t("common.save")}</Button>
       </div>
     </Sheet>
   );

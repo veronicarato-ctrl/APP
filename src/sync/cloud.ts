@@ -5,7 +5,8 @@ import { createClient, type Session, type SupabaseClient } from "@supabase/supab
 import { useSyncExternalStore } from "react";
 import { db } from "../db/db";
 import { onLocalWrite, setActor } from "../db/repo";
-import { pendingCount, recordLocalChanges, sync, type Transport, type WireRow } from "./engine";
+import { pendingCount, recordLocalChanges, type WireRow } from "./engine";
+import { syncAll, type CloudApi } from "./multi";
 import { syncFiles } from "./files";
 
 const URL_ = import.meta.env.VITE_SUPABASE_URL as string | undefined;
@@ -29,7 +30,7 @@ const subs = new Set<() => void>();
 const set = (p: Partial<CloudStatus>) => { status = { ...status, ...p }; subs.forEach((f) => f()); };
 export const useCloudStatus = () => useSyncExternalStore((f) => { subs.add(f); return () => subs.delete(f); }, () => status);
 
-function transport(c: SupabaseClient): Transport {
+function api(c: SupabaseClient, userId: string): CloudApi {
   return {
     async pull(tripId, sinceRev, limit) {
       const { data, error } = await c.from("records").select("kind, id, data, field_ts, rev").eq("trip_id", tripId).gt("rev", sinceRev).order("rev").limit(limit);
@@ -41,14 +42,40 @@ function transport(c: SupabaseClient): Transport {
       if (error) throw error;
       return data as WireRow[];
     },
+    async myTrips() {
+      const { data, error } = await c.from("trip_members").select("trip_id").eq("user_id", userId);
+      if (error) throw error;
+      return (data as { trip_id: string }[]).map((r) => r.trip_id);
+    },
+    async claim(tripId) {
+      const { data, error } = await c.rpc("claim_trip", { p_trip: tripId });
+      if (error) throw error;
+      return data as "owner" | "member" | "forbidden";
+    },
+    async acceptInvites() {
+      const { error } = await c.rpc("accept_invites");
+      if (error) throw error;
+    },
   };
 }
 
+/** Trip shown on this phone; members and invitations refer to it. */
 let tripId: string | undefined;
 let session: Session | null = null;
 let timer: ReturnType<typeof setTimeout> | undefined;
 
-const refreshPending = async () => { if (tripId) set({ pending: await pendingCount(tripId) }); };
+const refreshPending = async () => {
+  const ids = new Set((await db.syncMeta.toArray()).map((m) => m.tripId));
+  let n = 0;
+  for (const id of ids) n += await pendingCount(id);
+  set({ pending: n });
+};
+
+export function setCloudTrip(id: string | undefined) {
+  tripId = id;
+  set({ members: [] });
+  refreshMembers();
+}
 
 async function refreshMembers() {
   if (!cloud || !tripId || !session) return;
@@ -58,20 +85,21 @@ async function refreshMembers() {
 
 /** Full cycle; failures are classified so the screen can say what to do. */
 export async function syncNow() {
-  if (!cloud || !tripId || !session) return refreshPending();
+  if (!cloud || !session) return refreshPending();
   if (!navigator.onLine) { set({ phase: "offline" }); return refreshPending(); }
   set({ phase: "syncing" });
   try {
-    await sync(tripId, transport(cloud));
-    await syncFiles(tripId, cloud);
-    const st = await db.syncState.get(tripId);
-    set({ phase: "idle", lastSync: st?.lastSync, error: undefined });
+    const res = await syncAll(api(cloud, session.user.id));
+    for (const id of res.synced) await syncFiles(id, cloud);
+    const st = tripId ? await db.syncState.get(tripId) : undefined;
+    set({ phase: tripId && res.forbidden.includes(tripId) ? "forbidden" : "idle", lastSync: st?.lastSync ?? new Date().toISOString(), error: undefined });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String((e as { message?: string })?.message ?? e);
     const network = /fetch|network|Failed to|Load failed|NetworkError/i.test(msg);
-    set({ phase: !navigator.onLine ? "offline" : network ? "unreachable" : /not a member/i.test(msg) ? "forbidden" : "error", error: msg });
+    set({ phase: !navigator.onLine ? "offline" : network ? "unreachable" : "error", error: msg });
   }
   await refreshPending();
+  await refreshMembers();
 }
 
 const schedule = (ms = 2500) => { clearTimeout(timer); timer = setTimeout(syncNow, ms); };
@@ -80,25 +108,18 @@ async function onSignedIn(s: Session) {
   session = s;
   setActor(s.user.email ?? "me");
   set({ email: s.user.email ?? undefined, phase: "idle" });
-  if (!cloud || !tripId) return;
-  await cloud.rpc("accept_invites");
-  const { data, error } = await cloud.rpc("claim_trip", { p_trip: tripId });
-  if (error) { set({ phase: navigator.onLine ? "unreachable" : "offline", error: error.message }); return; }
-  if (data === "forbidden") { set({ phase: "forbidden" }); return; }
   await syncNow();
-  await refreshMembers();
 }
 
 /** Starts stamping local edits and, when configured, the sync triggers. */
-export function startCloud(id: string) {
-  tripId = id;
+export function startCloud() {
   onLocalWrite(async (t, d, opts) => {
     await recordLocalChanges(t, opts, d);
     await refreshPending();
     if (session) schedule();
   });
   // Snapshot right away so existing local data has a baseline before any edit.
-  recordLocalChanges(id).then(refreshPending);
+  db.trips.toArray().then(async (trips) => { for (const t of trips) await recordLocalChanges(t.id); await refreshPending(); });
   if (!cloud) return;
 
   cloud.auth.getSession().then(({ data }) => { if (data.session) onSignedIn(data.session); });
@@ -110,9 +131,8 @@ export function startCloud(id: string) {
   window.addEventListener("offline", () => set({ phase: session ? "offline" : status.phase }));
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") schedule(500); });
   setInterval(() => { if (session && document.visibilityState === "visible") syncNow(); }, 60_000);
-  cloud.channel(`records-${id}`)
-    .on("postgres_changes", { event: "*", schema: "public", table: "records", filter: `trip_id=eq.${id}` }, () => schedule(1000))
-    .subscribe();
+  // Row level security limits these events to the trips the user belongs to.
+  cloud.channel("records").on("postgres_changes", { event: "*", schema: "public", table: "records" }, () => schedule(1000)).subscribe();
 }
 
 /** Creates the account. Returns true when Supabase asks to confirm the address by e-mail first. */

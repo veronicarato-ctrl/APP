@@ -5,7 +5,7 @@ import type { Issue } from "../engine/rules";
 import { dateRange, nightsBetween } from "../lib/dates";
 import { callHomeVerdict, diffMin, fmtDiff, tzCity, wallClock, zonedInstant } from "../lib/time";
 import type { Booking, ISODate, TripState } from "../model/types";
-import { fmtDay, fmtDayLong } from "./format";
+import { fmtDay, fmtDayLong, homeName } from "./format";
 import { Card, IssueBox, SectionLabel, T } from "./primitives";
 import { TransportZone } from "./zone";
 
@@ -45,6 +45,7 @@ export function Today({ s, issues, actions }: { s: TripState; issues: Issue[]; a
     const errors = issues.filter((i) => i.level === "error");
     return (
       <div className="flex flex-col gap-4">
+        {!Object.values(s.days).some((x) => x.slots.length) && !s.bookings.length && <p className="text-sm text-soft">{t("today.empty")}</p>}
         <div className="rounded-[14px] p-4" style={{ background: "var(--id-dark)", color: "var(--on-dark)" }}>
           <p className="text-[34px] font-bold leading-none" style={{ color: "var(--id-accent)" }}>{days}</p>
           <p className="text-white font-semibold mt-1">{t("today.countdown", { count: days })}</p>
@@ -92,9 +93,9 @@ export function Today({ s, issues, actions }: { s: TripState; issues: Issue[]; a
           {t("today.dayOf", { n: dates.indexOf(today) + 1, total: dates.length })} · {fmtDay(today)}
         </p>
         <p className="text-white text-[17px] font-semibold mt-1 tabular-nums">
-          {t("time.nowLine", { local, place: here ? short(here.name.text) : tzCity(tz), home, homeName: s.trip.origin.text, diff: fmtDiff(diffMin(tz, s.trip.homeTz, now)) })}
+          {t("time.nowLine", { local, place: here ? short(here.name.text) : tzCity(tz), home, homeName: homeName(s), diff: fmtDiff(diffMin(tz, s.trip.homeTz, now)) })}
         </p>
-        <p className="text-[12.5px] mt-2"><strong className="text-white">{t("time.callHome")}</strong>, {t(`time.call_${verdict}`, { time: home, homeName: s.trip.origin.text })}</p>
+        <p className="text-[12.5px] mt-2"><strong className="text-white">{t("time.callHome")}</strong>, {t(`time.call_${verdict}`, { time: home, homeName: homeName(s) })}</p>
         <p className="text-[11px] opacity-80">{t("time.callNote")}</p>
       </div>
 
