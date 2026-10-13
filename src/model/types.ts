@@ -131,10 +131,14 @@ export interface Slot {
   sources?: string[];
   origin: "user" | "ai" | "import";
   info?: InfoNature;
+  /** Ticked by the travellers once done; a status of the trip, not a change of the plan. */
+  done?: boolean;
 }
 
 export interface Day {
   date: ISODate;
+  /** One sentence that sums up the day. */
+  summary?: Text;
   note?: Text;
   slots: Slot[];
 }

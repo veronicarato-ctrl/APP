@@ -15,6 +15,8 @@ const en = {
     label: "Day {{n}}", heavy_one: "{{count}} heavy", heavy_other: "{{count}} heavy", addActivity: "Add activity",
     stripHint: "Colours show the regions of the trip. Tap a day to jump to it.", stripHintMap: "Tap a day to show its route.", noTime: "··",
     who: "Who, {{who}}", price: "Price", lockedHint: "Booked, cannot be changed",
+    summaryAdd: "Add a summary of the day", summaryEdit: "Edit summary", summaryLabel: "One sentence that sums up the day",
+    done: "Done", notDone: "Not done", duration: "Duration {{d}}",
   },
   type: { transport: "Transport", lodging: "Lodging", meal: "Meal", culture: "Culture", nature: "Nature", show: "Show", rest: "Rest", ritual: "Ritual" },
   status: { todo: "To book", urgent: "Urgent", confirmed: "Confirmed" },
@@ -71,6 +73,8 @@ const en = {
     noTimes: "No timed activity this day, the split cannot be computed.",
     offline: "Offline, map tiles may be missing. Places, coordinates and addresses are listed below.",
     places: "Places", stop: "Stop {{n}}", attribution: "Map data © OpenStreetMap contributors",
+    visited: "Already seen", today: "Today", ahead: "Ahead",
+    legend: "Faded with a tick, already seen. Ringed, today. Numbered, ahead. Solid line, travelled. Dotted line, still to come.",
   },
   today: {
     countdown_one: "{{count}} day to departure", countdown_other: "{{count}} days to departure",

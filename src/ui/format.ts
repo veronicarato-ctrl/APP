@@ -9,6 +9,12 @@ import { tzCity } from "../lib/time";
 export const homeName = (s: TripState) => s.trip.origin.text.trim() || tzCity(s.trip.homeTz);
 
 export const fmtDay = (d: ISODate) => formatDay(d, LOCALE);
+
+/** "45 min", "2 h", "1 h 30". */
+export const fmtMinutes = (m: number) => {
+  const h = Math.floor(m / 60), r = m % 60;
+  return h ? `${h} h${r ? " " + String(r).padStart(2, "0") : ""}` : `${r} min`;
+};
 export const fmtDayLong = (d: ISODate) => formatDay(d, LOCALE, { weekday: "long", month: "long" });
 
 export function useIssueText() {

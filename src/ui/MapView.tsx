@@ -3,7 +3,7 @@ import "leaflet/dist/leaflet.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { TILE_ATTRIBUTION, TILE_MAX_ZOOM, TILE_URL } from "../config";
-import { dayPath, dayTimeSplit, route } from "../engine/derive";
+import { dayPath, dayTimeSplit, placeStates, route, type VisitState } from "../engine/derive";
 import { diffOnDate, fmtDiff, fmtUtc, tzOffsetMin } from "../lib/time";
 import type { ISODate, Place, Slot, SlotType, TripState } from "../model/types";
 import { fmtDay, homeName } from "./format";
@@ -28,12 +28,14 @@ export function MapView({ s, date, setDate, goToDay }: { s: TripState; date?: IS
   const [layers, setLayers] = useState<Set<Layer>>(new Set(["lodging", "transport", "activities", "restaurants"]));
   const [selected, setSelected] = useState<string>();
   const [tilesFailed, setTilesFailed] = useState(false);
+  const [hide, setHide] = useState<Set<VisitState>>(new Set());
   const [online, setOnline] = useState(typeof navigator === "undefined" ? true : navigator.onLine);
   const el = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const overlay = useRef<L.LayerGroup | null>(null);
 
   const full = useMemo(() => route(s), [s]);
+  const states = useMemo(() => placeStates(s, new Date()), [s]);
   const numberOf = (id: string) => full.stops.find((x) => x.place.id === id)?.n;
 
   // Slots per place, limited to the selected day, and the places visible with the active layers.
@@ -47,8 +49,10 @@ export function MapView({ s, date, setDate, goToDay }: { s: TripState; date?: IS
   }, [s, date]);
   const visible = useMemo(() => {
     const ids = date ? dayPath(s, date).map((p) => p.id) : full.stops.map((x) => x.place.id);
-    return ids.filter((id) => (slotsAt.get(id) ?? []).some((x) => layers.has(layerOf(x.slot))) || (date && !slotsAt.has(id)));
-  }, [s, date, full, slotsAt, layers]);
+    return ids
+      .filter((id) => (slotsAt.get(id) ?? []).some((x) => layers.has(layerOf(x.slot))) || (date && !slotsAt.has(id)))
+      .filter((id) => !hide.has(states[id] ?? "ahead"));
+  }, [s, date, full, slotsAt, layers, hide, states]);
   const segments = date ? route(s, date).segments : full.segments;
 
   useEffect(() => {
@@ -80,22 +84,30 @@ export function MapView({ s, date, setDate, goToDay }: { s: TripState; date?: IS
     for (const seg of segments) {
       if (!located(seg.from) || !located(seg.to)) continue;
       const color = css.getPropertyValue(`--region-${seg.to.region}-on-light`).trim() || css.getPropertyValue("--id-accent-on-light").trim();
-      L.polyline([[seg.from.lat!, seg.from.lng!], [seg.to.lat!, seg.to.lng!]], { color, weight: 4, opacity: 0.9, dashArray: seg.to.approx || seg.from.approx ? "6 6" : undefined }).addTo(g);
+      // Travelled legs are solid, legs still to come dotted, approximate positions dashed.
+      const ahead = (states[seg.to.id] ?? "ahead") === "ahead";
+      L.polyline([[seg.from.lat!, seg.from.lng!], [seg.to.lat!, seg.to.lng!]], {
+        color, weight: 4, opacity: ahead ? 0.75 : 0.95, dashArray: ahead ? "2 8" : seg.to.approx || seg.from.approx ? "6 6" : undefined,
+      }).addTo(g);
     }
     const pts: L.LatLngExpression[] = [];
     for (const id of visible) {
       const p = s.places[id];
       if (!located(p)) continue;
       pts.push([p.lat!, p.lng!]);
+      const st = states[id] ?? "ahead";
+      // On a single day, each place takes the colour of its activity type; on the whole trip, of its region.
+      const first = date ? slotsAt.get(id)?.[0]?.slot : undefined;
+      const bg = first ? css.getPropertyValue(`--${first.type}-dot`).trim() : regionColor(p.region);
       const icon = L.divIcon({
         className: "",
-        html: `<span class="stop${selected === id ? " stop-sel" : ""}" style="background:${regionColor(p.region)}">${numberOf(id) ?? ""}</span>`,
+        html: `<span class="stop${selected === id ? " stop-sel" : ""}${st === "visited" ? " stop-visited" : st === "today" ? " stop-today" : ""}" style="background:${bg}">${st === "visited" ? "✓" : numberOf(id) ?? ""}</span>`,
         iconSize: [30, 30], iconAnchor: [15, 15],
       });
       L.marker([p.lat!, p.lng!], { icon, title: p.name.text, keyboard: true }).on("click", () => setSelected(id)).addTo(g);
     }
     if (pts.length) m.fitBounds(L.latLngBounds(pts), { padding: [36, 36], maxZoom: date ? 11 : 7 });
-  }, [s, date, visible, selected]);
+  }, [s, date, visible, selected, states, slotsAt]);
 
   const sel = selected ? s.places[selected] : undefined;
   const split = date ? dayTimeSplit(s, date) : undefined;
@@ -123,6 +135,19 @@ export function MapView({ s, date, setDate, goToDay }: { s: TripState; date?: IS
         })}
       </div>
 
+      <div role="group" aria-label={t("map.legend")} className="flex flex-wrap gap-1.5 mb-1">
+        {(["visited", "ahead"] as const).map((v) => {
+          const on = !hide.has(v);
+          return (
+            <button key={v} aria-pressed={on} onClick={() => setHide((x) => { const n = new Set(x); if (n.has(v)) n.delete(v); else n.add(v); return n; })}
+              className="min-h-9 px-3 rounded-full text-[12.5px] font-semibold border"
+              style={on ? { background: "var(--id-dark)", color: "var(--on-color)", borderColor: "var(--id-dark)" } : { borderColor: "var(--line)" }}>
+              {t(`map.${v}`)}
+            </button>
+          );
+        })}
+      </div>
+      <p className="text-[11.5px] text-soft mb-3">{t("map.legend")}</p>
       {!Object.values(s.places).some(located) && <p className="mb-2 text-[13px] text-soft">{t("map.empty")}</p>}
       {offline && <p role="status" className="mb-2 text-[12.5px] px-3 py-1.5 rounded-md" style={{ background: "var(--warn-bg)", borderLeft: "3px solid var(--warn)", color: "var(--warn-ink)" }}>{t("map.offline")}</p>}
 
@@ -145,9 +170,10 @@ export function MapView({ s, date, setDate, goToDay }: { s: TripState; date?: IS
             return (
               <button key={id} onClick={() => setSelected(id)} className="text-left">
                 <Card className="px-3.5 py-2.5 flex gap-3 items-center">
-                  <span className="stop" style={{ background: regionColor(p.region) }}>{numberOf(id)}</span>
+                  <span className={`stop${states[id] === "visited" ? " stop-visited" : ""}`} style={{ background: regionColor(p.region) }}>{states[id] === "visited" ? "✓" : numberOf(id)}</span>
                   <span className="flex-1">
                     <strong><T v={p.name} /></strong>
+                    {states[id] && states[id] !== "ahead" && <span className="ml-2 text-[11px] font-semibold text-label">{t(`map.${states[id]}`)}</span>}
                     <span className="block text-[12px] text-soft tabular-nums">{located(p) ? `${p.lat}, ${p.lng}` : t("map.noCoords")}{p.approx ? ` · ${t("map.approx")}` : ""}</span>
                   </span>
                 </Card>

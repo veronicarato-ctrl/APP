@@ -1,7 +1,7 @@
 import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it } from "vitest";
 import { TravelDB } from "./db";
-import { createTrip, deleteSlot, deletePlace, deleteTrip, getActiveTripId, listTrips, loadExampleTrip, loadState, saveBooking, savePlace, saveSlot, setActiveTripId, updateTrip } from "./repo";
+import { createTrip, saveDaySummary, setSlotDone, deleteSlot, deletePlace, deleteTrip, getActiveTripId, listTrips, loadExampleTrip, loadState, saveBooking, savePlace, saveSlot, setActiveTripId, updateTrip } from "./repo";
 import { BRAZIL_TRIP_KEY, importBrazil } from "../data/importBrazil";
 import { runRules } from "../engine/rules";
 
@@ -49,6 +49,28 @@ describe("local storage", () => {
 });
 
 const NEW = { name: "Japan", lang: "en" as const, start: "2027-04-01", end: "2027-04-03", adults: 2, children: [], origin: "Geneva", homeTz: "Europe/Paris", homeCurrency: "EUR", destCurrency: "JPY", budget: 3000, intent: "Deux semaines au Japon, temples et onsen.", modes: { culture: 5, relaxation: 3 } };
+
+describe("day summary and done activities", () => {
+  it("ticks an activity done, even on a locked slot, and logs it", async () => {
+    const id = (await getActiveTripId(d))!;
+    const s = (await loadState(id, d))!;
+    const date = Object.keys(s.days).sort().find((x) => s.days[x].slots.length)!;
+    const x = s.days[date].slots[0];
+    await setSlotDone(id, date, x.id, true, d);
+    expect((await loadState(id, d))!.days[date].slots[0].done).toBe(true);
+    await setSlotDone(id, date, x.id, false, d);
+    const after = (await loadState(id, d))!;
+    expect(after.days[date].slots[0].done).toBeUndefined();
+    expect(after.log.some((l) => l.message.startsWith("Done,"))).toBe(true);
+  });
+  it("sets and clears the summary of a day", async () => {
+    const id = (await getActiveTripId(d))!;
+    await saveDaySummary(id, "2026-12-15", "  Dunes and cliffs of Canoa Quebrada.  ", "en", d);
+    expect((await loadState(id, d))!.days["2026-12-15"].summary).toEqual({ text: "Dunes and cliffs of Canoa Quebrada.", lang: "en" });
+    await saveDaySummary(id, "2026-12-15", "", "en", d);
+    expect((await loadState(id, d))!.days["2026-12-15"].summary).toBeUndefined();
+  });
+});
 
 describe("several trips", () => {
   it("creates an empty trip with one day per date and makes it the active one", async () => {

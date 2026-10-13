@@ -157,6 +157,15 @@ html,
 .stop-sel {
   outline: 3px solid var(--id-accent);
 }
+/* Place already visited: faded, ticked. */
+.stop-visited {
+  opacity: 0.55;
+}
+/* Place of today: larger, ringed. */
+.stop-today {
+  transform: scale(1.25);
+  box-shadow: 0 0 0 3px var(--card), 0 0 0 5px var(--id-accent-on-light);
+}
 .leaflet-container {
   font: inherit;
   background: var(--other-bg);

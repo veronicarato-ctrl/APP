@@ -4,7 +4,7 @@ import { importBrazil, PROTOTYPE } from "../data/importBrazil";
 import { THEMES } from "../data/themes";
 import { dateRange } from "../lib/dates";
 import { newId } from "../lib/ids";
-import type { Booking, Check, ISODate, Place, Slot, TravelMode, Trip, TripState } from "../model/types";
+import type { Booking, Check, ISODate, Lang, Place, Slot, TravelMode, Trip, TripState } from "../model/types";
 
 type WriteListener = (tripId: string, d: TravelDB, opts: { baseline?: boolean }) => void | Promise<void>;
 const listeners = new Set<WriteListener>();
@@ -223,6 +223,31 @@ export async function saveSlot(tripId: string, fromDate: ISODate, slot: Slot, to
     }
     const verb = i >= 0 ? "Edited" : "Added";
     await logEntry(d, tripId, `${verb} “${slot.title.text}”${toDate !== fromDate ? ` and moved from ${fromDate} to ${toDate}` : ` on ${fromDate}`}`);
+  });
+  await wrote(tripId, d);
+}
+
+/** Ticks or unticks an activity as done. Allowed on locked slots: it records what happened, the plan is unchanged. */
+export async function setSlotDone(tripId: string, date: ISODate, slotId: string, done: boolean, d: TravelDB = db) {
+  await d.transaction("rw", [d.days, d.log], async () => {
+    const day = await d.days.get([tripId, date]);
+    const x = day?.slots.find((y) => y.id === slotId);
+    if (!day || !x) return;
+    if (done) x.done = true; else delete x.done;
+    await d.days.put(day);
+    await logEntry(d, tripId, `${done ? "Done" : "Not done"}, “${x.title.text}” on ${date}`);
+  });
+  await wrote(tripId, d);
+}
+
+/** Sets or clears the one-sentence summary of a day. */
+export async function saveDaySummary(tripId: string, date: ISODate, text: string, lang: Lang, d: TravelDB = db) {
+  await d.transaction("rw", [d.days, d.log], async () => {
+    const day = await d.days.get([tripId, date]);
+    if (!day) throw new Error("Day not found");
+    if (text.trim()) day.summary = { text: text.trim(), lang: day.summary?.lang ?? lang }; else delete day.summary;
+    await d.days.put(day);
+    await logEntry(d, tripId, `Summary of ${date} ${text.trim() ? "updated" : "removed"}`);
   });
   await wrote(tripId, d);
 }
