@@ -1,7 +1,7 @@
 import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it } from "vitest";
 import { TravelDB } from "./db";
-import { createTrip, saveDaySummary, setSlotDone, deleteSlot, deletePlace, deleteTrip, getActiveTripId, listTrips, loadExampleTrip, loadState, saveBooking, savePlace, saveSlot, setActiveTripId, updateTrip } from "./repo";
+import { applyAssistantChanges, createTrip, lastAssistantUndo, saveDaySummary, undoAssistantChanges, setSlotDone, deleteSlot, deletePlace, deleteTrip, getActiveTripId, listTrips, loadExampleTrip, loadState, saveBooking, savePlace, saveSlot, setActiveTripId, updateTrip } from "./repo";
 import { BRAZIL_TRIP_KEY, importBrazil } from "../data/importBrazil";
 import { runRules } from "../engine/rules";
 
@@ -69,6 +69,25 @@ describe("day summary and done activities", () => {
     expect((await loadState(id, d))!.days["2026-12-15"].summary).toEqual({ text: "Dunes and cliffs of Canoa Quebrada.", lang: "en" });
     await saveDaySummary(id, "2026-12-15", "", "en", d);
     expect((await loadState(id, d))!.days["2026-12-15"].summary).toBeUndefined();
+  });
+});
+
+describe("assistant changes", () => {
+  it("applies accepted changes with their history, and undoes them", async () => {
+    const id = (await getActiveTripId(d))!;
+    const before = (await loadState(id, d))!;
+    const after = structuredClone(before);
+    after.days["2026-12-15"].summary = { text: "Proposed summary.", lang: "en" };
+    await applyAssistantChanges(before, after, ["Assistant: summary of 2026-12-15"], d);
+    const s1 = (await loadState(id, d))!;
+    expect(s1.days["2026-12-15"].summary?.text).toBe("Proposed summary.");
+    expect(s1.log[0].message).toBe("Assistant: summary of 2026-12-15");
+    expect(await lastAssistantUndo(id, d)).toBeDefined();
+    expect(await undoAssistantChanges(id, d)).toBe(true);
+    const s2 = (await loadState(id, d))!;
+    expect(s2.days["2026-12-15"].summary).toBeUndefined();
+    expect(s2.log.map((l) => l.message).slice(0, 2)).toEqual(["Undid the last changes accepted from the assistant", "Assistant: summary of 2026-12-15"]);
+    expect(await undoAssistantChanges(id, d)).toBe(false);
   });
 });
 

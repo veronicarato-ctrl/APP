@@ -9,7 +9,7 @@ import { fmtDay, fmtDayLong, homeName } from "./format";
 import { Card, IssueBox, SectionLabel, T } from "./primitives";
 import { TransportZone } from "./zone";
 
-interface Actions { openBooking: (id: string) => void; goToDay: (d: ISODate) => void; openVerification: () => void }
+interface Actions { openBooking: (id: string) => void; goToDay: (d: ISODate) => void; openVerification: () => void; openMood: (d: ISODate) => void }
 
 const short = (s: string) => s.split(",")[0];
 const until = (ms: number) => {
@@ -99,6 +99,7 @@ export function Today({ s, issues, actions }: { s: TripState; issues: Issue[]; a
         <p className="text-[11px] opacity-80">{t("time.callNote")}</p>
       </div>
 
+      <button onClick={() => actions.openMood(today)} className="min-h-11 px-4 rounded-[10px] font-semibold border border-line text-left">✦ {t("mood.button")}</button>
       {todayIssues.length > 0 && <div className="flex flex-col gap-1.5">{todayIssues.map((x, i) => <IssueBox key={i} issue={x} />)}</div>}
 
       <div className="grid grid-cols-2 gap-2.5">

@@ -169,6 +169,34 @@ export async function replaceTrip(tripId: string, s: TripState, d: TravelDB = db
   });
 }
 
+/**
+ * Writes the changes the travellers accepted from the assistant, keeps the previous trip so the last
+ * application can be undone, and records each change in the history.
+ */
+export async function applyAssistantChanges(before: TripState, after: TripState, messages: string[], d: TravelDB = db) {
+  const tripId = before.trip.id;
+  await d.settings.put({ key: `undo:${tripId}`, value: { at: new Date().toISOString(), state: { ...before, log: [] } } });
+  await replaceTrip(tripId, { ...after, log: before.log }, d);
+  for (const m of messages) await logEntry(d, tripId, m);
+  await wrote(tripId, d);
+}
+
+export async function lastAssistantUndo(tripId: string, d: TravelDB = db) {
+  return (await d.settings.get(`undo:${tripId}`))?.value as { at: string; state: TripState } | undefined;
+}
+
+/** Puts the trip back as it was before the last assistant application; the history keeps both steps. */
+export async function undoAssistantChanges(tripId: string, d: TravelDB = db) {
+  const u = await lastAssistantUndo(tripId, d);
+  const now = await loadState(tripId, d);
+  if (!u || !now) return false;
+  await replaceTrip(tripId, { ...u.state, log: now.log }, d);
+  await logEntry(d, tripId, "Undid the last changes accepted from the assistant");
+  await d.settings.delete(`undo:${tripId}`);
+  await wrote(tripId, d);
+  return true;
+}
+
 /** Removes a trip from this phone without stamping anything (used when it was deleted elsewhere). */
 export async function removeTripLocal(tripId: string, d: TravelDB = db) {
   await d.transaction("rw", [d.trips, ...TRIP_TABLES(d)], async () => {
