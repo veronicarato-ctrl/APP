@@ -97,3 +97,7 @@ C'est la forme attendue pour le point 4 (zone libre pour dicter ses envies) et p
 ## Cahier des modifications
 
 Toutes ces demandes sont mises en page, avec les décisions à prendre et l'ordre de réalisation, dans le document « Guião de viagem, cahier des modifications » (https://claude.ai/code/artifact/616bb9fc-ec36-4540-91d5-cdfd15f86391), qui fait référence en cas d'écart avec ce fichier.
+
+## Tâches à accomplir
+
+- [ ] **Photos de l'accueil** (décision du 13 octobre 2026, reportée). Le mécanisme est en place (alternance toutes les 8 secondes, bouton pause, crédits, hors ligne), la liste `src/data/welcomePhotos.ts` reste vide et l'accueil affiche les couleurs du voyage. À faire plus tard, choisir une douzaine de photos des pays les plus visités avec une licence autorisant l'usage commercial (par exemple Unsplash, licence à lire sur sa page officielle), les déposer dans `public/photos` avec lieu, pays, auteur et lien de la page, puis vérifier que chaque photo montre bien le lieu annoncé.
