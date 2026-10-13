@@ -29,8 +29,8 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // The whole app shell is precached, so it opens in airplane mode.
-        globPatterns: ["**/*.{js,css,html,svg,png,woff2}"],
+        // The whole app shell, welcome photos included, is precached, so it opens in airplane mode.
+        globPatterns: ["**/*.{js,css,html,svg,png,jpg,jpeg,webp,woff2}"],
         navigateFallback: "/index.html",
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         runtimeCaching: [

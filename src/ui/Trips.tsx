@@ -1,29 +1,51 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { MODE_MAX, MODES } from "../data/modes";
-import { createTrip, deleteTrip, loadExampleTrip, setActiveTripId, updateTrip, type NewTrip } from "../db/repo";
+import { WELCOME_PHOTOS } from "../data/welcomePhotos";
+import { createTrip, deleteTrip, loadExampleTrip, loadState, setActiveTripId, updateTrip, type NewTrip } from "../db/repo";
+import { shrinkImage } from "../lib/image";
+import { keepFiles } from "../sync/files";
 import { dateRange } from "../lib/dates";
 import { LANG_NAMES } from "../i18n";
 import { CURRENCIES, currencyLabel } from "../lib/currencies";
 import { deviceZone, homeZoneFor, zoneForCity, ZONES } from "../lib/zones";
-import type { Lang, TravelMode, Trip } from "../model/types";
+import type { FileRef, Lang, TravelMode, Trip } from "../model/types";
 import { fmtDay } from "./format";
+import { PhotoRotator } from "./PhotoRotator";
 import { Button, Card, Field, Sheet } from "./primitives";
+import { useBlobUrl } from "./useBlobUrl";
 
 const errText = (e: unknown) => (e instanceof Error ? e.message : String(e));
 
-/** First screen when the phone has no trip yet. */
+/** First screen when the phone has no trip yet: photos that give the urge to travel, then the two ways in. */
 export function Welcome({ onCreate }: { onCreate: () => void }) {
   const { t } = useTranslation();
   return (
-    <div className="max-w-xl mx-auto px-4 py-10">
-      <h1 className="text-2xl font-bold mb-2">{t("trips.welcome")}</h1>
-      <p className="text-soft mb-6">{t("trips.welcomeIntro")}</p>
-      <Button className="w-full mb-3" onClick={onCreate}>{t("trips.create")}</Button>
-      <Button variant="ghost" className="w-full" onClick={() => loadExampleTrip()}>{t("trips.example")}</Button>
-      <p className="text-[12.5px] text-soft mt-2">{t("trips.exampleNote")}</p>
+    <div className="min-h-dvh">
+      <div className="relative h-[52vh] min-h-72 overflow-hidden" style={{ background: "linear-gradient(135deg, var(--id-darker), var(--id-dark))" }}>
+        {WELCOME_PHOTOS.length > 0 && <PhotoRotator photos={WELCOME_PHOTOS} />}
+        {/* Darkens the bottom of any photo so the white title keeps its contrast. */}
+        <div aria-hidden className="absolute inset-0 pointer-events-none" style={{ background: "linear-gradient(to bottom, transparent 35%, color-mix(in srgb, var(--id-darker) 80%, transparent) 75%)" }} />
+        <div className="absolute z-10 left-4 right-4 bottom-12 max-w-xl mx-auto">
+          <p className="text-[11px] font-bold tracking-[0.3em] uppercase" style={{ color: "var(--id-accent)" }}>{t("trips.welcome")}</p>
+          <h1 className="text-[32px] font-bold leading-tight text-white">{t("trips.welcomeTitle")}</h1>
+        </div>
+      </div>
+      <div className="max-w-xl mx-auto px-4 py-6">
+        <p className="text-soft mb-6">{t("trips.welcomeIntro")}</p>
+        <Button className="w-full mb-3" onClick={onCreate}>{t("trips.create")}</Button>
+        <Button variant="ghost" className="w-full" onClick={() => loadExampleTrip()}>{t("trips.example")}</Button>
+        <p className="text-[12.5px] text-soft mt-2">{t("trips.exampleNote")}</p>
+      </div>
     </div>
   );
+}
+
+function TripThumb({ trip }: { trip: Trip }) {
+  const url = useBlobUrl(trip.cover?.path);
+  return url
+    ? <img src={url} alt="" className="w-14 h-14 rounded-[10px] object-cover shrink-0" />
+    : <span aria-hidden className="w-14 h-14 rounded-[10px] shrink-0" style={{ background: `linear-gradient(135deg, ${trip.theme.darker}, ${trip.theme.dark})` }} />;
 }
 
 /** List of trips with switch, creation and the example. */
@@ -34,12 +56,15 @@ export function TripsSheet({ trips, activeId, onClose, onCreate }: { trips: Trip
       <div className="flex flex-col gap-2 mb-4">
         {trips.map((x) => (
           <button key={x.id} onClick={async () => { await setActiveTripId(x.id); onClose(); }} className="text-left">
-            <Card className="p-3.5" topColor={x.theme.accent}>
-              <div className="flex justify-between gap-2">
-                <strong lang={x.name.lang}>{x.name.text}</strong>
-                {x.id === activeId && <span className="text-[11px] font-semibold text-label">{t("trips.current")}</span>}
+            <Card className="p-3 flex gap-3 items-center" topColor={x.theme.accent}>
+              <TripThumb trip={x} />
+              <div className="flex-1">
+                <div className="flex justify-between gap-2">
+                  <strong lang={x.name.lang}>{x.name.text}</strong>
+                  {x.id === activeId && <span className="text-[11px] font-semibold text-label">{t("trips.current")}</span>}
+                </div>
+                <p className="text-[12.5px] text-soft">{fmtDay(x.start)} → {fmtDay(x.end)} · {t("trips.days", { count: dateRange(x.start, x.end).length })}</p>
               </div>
-              <p className="text-[12.5px] text-soft">{fmtDay(x.start)} → {fmtDay(x.end)} · {t("trips.days", { count: dateRange(x.start, x.end).length })}</p>
             </Card>
           </button>
         ))}
@@ -82,7 +107,18 @@ export function TripForm({ trip, onClose }: { trip?: Trip; onClose: () => void }
     };
   });
   const [err, setErr] = useState<string>();
+  // Cover photo: an existing trip stores it at once; a new trip keeps the file until it is created.
+  const [cover, setCover] = useState<FileRef | undefined>(trip?.cover);
+  const [pendingCover, setPendingCover] = useState<File>();
+  const pendingUrl = usePendingUrl(pendingCover);
+  const coverUrl = useBlobUrl(cover?.path) ?? pendingUrl;
   const upd = (p: Partial<typeof f>) => setF({ ...f, ...p });
+  const pickCover = async (file?: File) => {
+    if (!file) return;
+    const small = await shrinkImage(file);
+    if (trip) setCover((await keepFiles(trip.id, "cover", [small]))[0]);
+    else setPendingCover(small);
+  };
   const children = f.children.split(",").map((x) => parseInt(x.trim(), 10)).filter((x) => !Number.isNaN(x));
   const homeTz = f.tzManual ? f.homeTz : homeZoneFor(f.origin);
   const budget = f.budget.trim() === "" ? null : Math.max(0, Number(f.budget.replace(",", ".")) || 0);
@@ -98,7 +134,12 @@ export function TripForm({ trip, onClose }: { trip?: Trip; onClose: () => void }
           origin: f.origin.trim(), homeTz, homeCurrency: f.homeCurrency, destCurrency: f.destCurrency,
           budget, intent: f.intent, modes: f.modes,
         };
-        await createTrip(input);
+        const id = await createTrip(input);
+        if (pendingCover) {
+          const [ref] = await keepFiles(id, "cover", [pendingCover]);
+          const created = (await loadState(id))!.trip;
+          await updateTrip({ ...created, cover: ref });
+        }
       } else {
         const next: Trip = {
           ...trip,
@@ -112,6 +153,7 @@ export function TripForm({ trip, onClose }: { trip?: Trip; onClose: () => void }
         // The traveller's words keep the language they were written in.
         if (f.intent.trim()) next.intent = { text: f.intent, lang: trip.intent?.lang ?? f.lang }; else delete next.intent;
         if (f.destCurrency) next.destCurrency = f.destCurrency; else delete next.destCurrency;
+        if (cover) next.cover = cover; else delete next.cover;
         await updateTrip(next);
       }
       onClose();
@@ -170,6 +212,18 @@ export function TripForm({ trip, onClose }: { trip?: Trip; onClose: () => void }
       </div>
       <p className="text-[12.5px] text-soft -mt-1 mb-3">{t("tripForm.budgetNote")}</p>
       <Field label={t("tripForm.destCurrency")}><CurrencySelect value={f.destCurrency} onChange={(v) => upd({ destCurrency: v })} allowEmpty /></Field>
+      <p className="text-[12.5px] text-soft mb-1">{t("tripForm.cover")}</p>
+      <div className="flex items-center gap-3 mb-1">
+        {coverUrl
+          ? <img src={coverUrl} alt={t("tripForm.coverAlt")} className="w-24 h-16 rounded-[10px] object-cover" />
+          : <span aria-hidden className="w-24 h-16 rounded-[10px]" style={{ background: "linear-gradient(135deg, var(--id-darker), var(--id-dark))" }} />}
+        <label className="min-h-11 px-4 rounded-[10px] font-semibold inline-flex items-center border border-line cursor-pointer">
+          {coverUrl ? t("tripForm.coverChange") : t("tripForm.coverAdd")}
+          <input type="file" accept="image/*" className="sr-only" onChange={(e) => pickCover(e.target.files?.[0])} />
+        </label>
+        {coverUrl && <button type="button" className="underline min-h-11" onClick={() => { setCover(undefined); setPendingCover(undefined); }}>{t("tripForm.coverRemove")}</button>}
+      </div>
+      <p className="text-[12px] text-soft mb-3">{t("tripForm.coverNote")}</p>
     </>
   );
 
@@ -249,6 +303,17 @@ export function TripForm({ trip, onClose }: { trip?: Trip; onClose: () => void }
       </div>
     </Sheet>
   );
+}
+
+function usePendingUrl(file?: File) {
+  const [url, setUrl] = useState<string>();
+  useEffect(() => {
+    if (!file) { setUrl(undefined); return; }
+    const u = URL.createObjectURL(file);
+    setUrl(u);
+    return () => URL.revokeObjectURL(u);
+  }, [file]);
+  return url;
 }
 
 function CurrencySelect({ value, onChange, allowEmpty }: { value: string; onChange: (v: string) => void; allowEmpty?: boolean }) {

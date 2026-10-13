@@ -201,6 +201,8 @@ export interface Trip {
   budget: number | null;
   /** The traveller's wishes in their own words, kept verbatim (SPEC section 6.1). */
   intent?: Text;
+  /** Cover photo chosen by the travellers, so the picture always shows their own trip. */
+  cover?: FileRef;
   /** Rating of each travel theme; an absent theme was not rated. */
   modes?: Partial<Record<TravelMode, number>>;
   rules: TripRules;

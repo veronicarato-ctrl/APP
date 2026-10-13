@@ -15,6 +15,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "./db/db";
 import { setCloudTrip, useCloudStatus } from "./sync/cloud";
 import { TripForm, TripsSheet, Welcome } from "./ui/Trips";
+import { useBlobUrl } from "./ui/useBlobUrl";
 
 type Tab = "today" | "itinerary" | "map" | "practical" | "assistant";
 const TABS: [Tab, string][] = [["today", "☀"], ["itinerary", "☰"], ["map", "⌖"], ["practical", "▦"], ["assistant", "✦"]];
@@ -33,6 +34,7 @@ export default function App() {
   const [tripsOpen, setTripsOpen] = useState(false);
   const [appearance, setAppearance] = useAppearance();
   const cloud = useCloudStatus();
+  const coverUrl = useBlobUrl(s?.trip.cover?.path);
   const conflicts = useLiveQuery(() => db.conflicts.filter((c) => !c.dismissed).count(), []) ?? 0;
 
   useEffect(() => { if (s) applyTripTheme(s.trip.theme); }, [s?.trip.theme]);
@@ -58,7 +60,10 @@ export default function App() {
   return (
     <div className="min-h-dvh pb-24">
       <header className="relative overflow-hidden px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-3"
-        style={{ background: "linear-gradient(135deg, var(--id-darker), var(--id-dark))" }}>
+        style={{ background: coverUrl
+          // The trip's own photo, darkened enough for the white text to keep its contrast.
+          ? `linear-gradient(135deg, color-mix(in srgb, var(--id-darker) 82%, transparent), color-mix(in srgb, var(--id-dark) 78%, transparent)), center / cover no-repeat url("${coverUrl}")`
+          : "linear-gradient(135deg, var(--id-darker), var(--id-dark))" }}>
         <span aria-hidden className="absolute -right-2 top-1 text-[64px] font-black tracking-tight select-none pointer-events-none" style={{ color: "var(--watermark)" }}>{watermark}</span>
         <div className="relative max-w-3xl mx-auto">
           <p className="text-[10px] font-bold tracking-[0.3em] uppercase" style={{ color: "var(--id-accent)" }}>

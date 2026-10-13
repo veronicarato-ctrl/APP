@@ -4,12 +4,15 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { db as defaultDb, type TravelDB } from "../db/db";
 import { loadState } from "../db/repo";
 import { newId } from "../lib/ids";
-import type { FileRef } from "../model/types";
+import type { FileRef, TripState } from "../model/types";
 
 export const BUCKET = "trip-files";
 const safe = (name: string) => name.normalize("NFKD").replace(/[^\w.-]+/g, "_").slice(-80);
 
-/** Keeps the files on the phone and returns their references, to be saved in the booking. */
+/** Every file a trip refers to: booking attachments and the cover photo. */
+export const filesOf = (s: TripState): FileRef[] => [...s.bookings.flatMap((b) => b.files ?? []), ...(s.trip.cover ? [s.trip.cover] : [])];
+
+/** Keeps the files on the phone and returns their references, to be saved in the booking ("cover" for the trip photo). */
 export async function keepFiles(tripId: string, bookingId: string, files: File[], d: TravelDB = defaultDb): Promise<FileRef[]> {
   const refs = files.map((f) => {
     const id = newId();
@@ -29,7 +32,7 @@ export async function syncFiles(tripId: string, c: SupabaseClient, d: TravelDB =
     await d.blobs.update(b.path, { uploaded: true });
   }
   const s = await loadState(tripId, d);
-  const wanted = (s?.bookings ?? []).flatMap((b) => b.files ?? []);
+  const wanted = s ? filesOf(s) : [];
   for (const f of wanted) {
     if (await d.blobs.get(f.path)) continue;
     const { data, error } = await c.storage.from(BUCKET).download(f.path);
