@@ -6,7 +6,7 @@ import { saveDaySummary, setSlotDone } from "../db/repo";
 import { wallClock } from "../lib/time";
 import { dateRange } from "../lib/dates";
 import type { ISODate, Slot, TripState } from "../model/types";
-import { fmtDay, fmtMinutes } from "./format";
+import { fmtDay, fmtMinutes, fmtPrice } from "./format";
 import { Button, IssueBox, Sources, T, TypePill, typeVars } from "./primitives";
 import { dayRegions, regionColor } from "./regions";
 import { DayZone, TransportZone, TzNotice } from "./zone";
@@ -129,6 +129,7 @@ function SlotRow({ s, date, x, past, issues, actions }: { s: TripState; date: IS
       {open && (
         <div className="ml-[86px] mr-4 mb-3 p-3 rounded-lg text-[13px] flex flex-col gap-1.5" style={{ background: c.bg, borderLeft: `3px solid ${c.dot}` }}>
           {x.desc && <p><T v={x.desc} /></p>}
+          {x.price && fmtPrice(x.price, t) && <p><strong>{t("day.price")}</strong> {fmtPrice(x.price, t)}</p>}
           {x.price?.note && <p><strong>{t("day.price")}</strong> <T v={x.price.note} /></p>}
           {x.tips?.map((tip, k) => <p key={k} className="pl-3" style={{ borderLeft: `2px solid ${c.dot}` }}><T v={tip} /></p>)}
           {bk?.note && <p className="text-soft"><T v={bk.note} /></p>}

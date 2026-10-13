@@ -2,7 +2,7 @@
 // so two people editing different things never overwrite each other. Conflicts are resolved per field.
 import type { TripState } from "../model/types";
 
-export type Kind = "trip" | "place" | "booking" | "day" | "slot" | "source" | "check" | "prep" | "log";
+export type Kind = "trip" | "place" | "booking" | "day" | "slot" | "source" | "check" | "prep" | "log" | "expense";
 export type Data = Record<string, unknown>;
 export interface Rec { kind: Kind; id: string; data: Data }
 
@@ -24,6 +24,7 @@ export function explode(s: TripState): Rec[] {
   s.checks.forEach((c, pos) => out.push({ kind: "check", id: c.id, data: clean({ ...c, pos }) }));
   s.prep.forEach((p, pos) => out.push({ kind: "prep", id: p.id, data: clean({ ...p, pos }) }));
   for (const l of s.log) out.push({ kind: "log", id: l.id, data: clean(l) });
+  for (const x of s.expenses) out.push({ kind: "expense", id: x.id, data: clean(x) });
   return out;
 }
 
@@ -52,5 +53,6 @@ export function implode(recs: Rec[]): TripState {
     checks: of("check").sort(byPos).map(noPos) as never,
     prep: of("prep").sort(byPos).map(noPos) as never,
     log: (of("log") as { at: string }[]).sort((a, b) => b.at.localeCompare(a.at)) as never,
+    expenses: (of("expense") as { date: string; id: string }[]).sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id)) as never,
   };
 }

@@ -73,7 +73,7 @@ export async function pendingCount(tripId: string, d: TravelDB = defaultDb) {
 export async function applyRemote(tripId: string, rows: WireRow[], d: TravelDB = defaultDb): Promise<Conflict[]> {
   if (!rows.length) return [];
   const conflicts: Conflict[] = [];
-  await d.transaction("rw", [d.syncMeta, d.syncState, d.conflicts, d.trips, d.places, d.bookings, d.days, d.sources, d.checks, d.prep, d.log], async () => {
+  await d.transaction("rw", [d.syncMeta, d.syncState, d.conflicts, d.trips, d.places, d.bookings, d.days, d.sources, d.checks, d.prep, d.log, d.expenses], async () => {
     const metas = new Map((await d.syncMeta.where({ tripId }).toArray()).map((m) => [m.key, m]));
     const st = await state(d, tripId);
     let clock = st.clock;

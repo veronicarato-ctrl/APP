@@ -7,6 +7,7 @@ import { LANG_NAMES } from "../i18n";
 import type { Booking, BookingKind, BookingStatus, ISODate, Lang, Slot, SlotType, Text, TripState } from "../model/types";
 import { fmtDay } from "./format";
 import { Button, Field, Sheet } from "./primitives";
+import { PriceFields } from "./PriceFields";
 import { keepFiles, openFile } from "../sync/files";
 import { cloud } from "../sync/cloud";
 
@@ -74,6 +75,7 @@ export function SlotEditor({ s, date, id, onSave, onDelete, onClose }: {
             {Object.entries(LANG_NAMES).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
         </Field>
+        <PriceFields s={s} price={x.price} onChange={(price) => upd({ price })} />
         <label className="flex items-center gap-2 min-h-11 text-sm">
           <input type="checkbox" className="w-5 h-5" checked={x.heavy} onChange={(e) => upd({ heavy: e.target.checked })} />
           {t("slotEditor.heavy")}
@@ -161,6 +163,7 @@ export function BookingEditor({ s, id, onSave, onClose }: { s: TripState; id: st
           <Field label={t("bookingEditor.checkOut")}><input className="field" type="time" value={b.checkOut} onChange={(e) => upd({ checkOut: e.target.value })} /></Field>
         </div>
       )}
+      <PriceFields s={s} price={b.price} onChange={(price) => upd({ price })} />
       <Field label={t("bookingEditor.note")}>
         <textarea className="field" rows={3} lang={b.note?.lang} value={b.note?.text ?? ""} onChange={(e) => upd({ note: setText(b.note, e.target.value, "en") })} />
       </Field>

@@ -4,7 +4,7 @@ import { importBrazil, PROTOTYPE } from "../data/importBrazil";
 import { THEMES } from "../data/themes";
 import { dateRange } from "../lib/dates";
 import { newId } from "../lib/ids";
-import type { Booking, Check, ISODate, Lang, Place, Slot, TravelMode, Trip, TripState } from "../model/types";
+import type { Booking, Check, Expense, ISODate, Lang, Place, Slot, TravelMode, Trip, TripState } from "../model/types";
 
 type WriteListener = (tripId: string, d: TravelDB, opts: { baseline?: boolean }) => void | Promise<void>;
 const listeners = new Set<WriteListener>();
@@ -74,7 +74,7 @@ export async function createTrip(input: NewTrip, d: TravelDB = db) {
     v: 2,
   };
   const days = Object.fromEntries(dateRange(input.start, input.end).map((date) => [date, { date, slots: [] }]));
-  await saveState({ trip, places: {}, bookings: [], days, sources: {}, checks: [], prep: [], log: [] }, d);
+  await saveState({ trip, places: {}, bookings: [], days, sources: {}, checks: [], prep: [], log: [], expenses: [] }, d);
   await d.log.add({ id: newId(), tripId: id, at: new Date().toISOString(), who: actor, message: `Created trip “${input.name}”` });
   await wrote(id, d);
   await setActiveTripId(id, d);
@@ -146,7 +146,7 @@ export async function deletePlace(tripId: string, placeId: string, d: TravelDB =
 
 export async function saveState(s: TripState, d: TravelDB = db) {
   const tripId = s.trip.id;
-  await d.transaction("rw", [d.trips, d.places, d.bookings, d.days, d.sources, d.checks, d.prep, d.log], async () => {
+  await d.transaction("rw", [d.trips, d.places, d.bookings, d.days, d.sources, d.checks, d.prep, d.log, d.expenses], async () => {
     await d.trips.put(s.trip);
     await d.places.bulkPut(Object.values(s.places).map((p) => ({ ...p, tripId })));
     await d.bookings.bulkPut(s.bookings.map((b, order) => ({ ...b, tripId, order })));
@@ -155,10 +155,11 @@ export async function saveState(s: TripState, d: TravelDB = db) {
     await d.checks.bulkPut(s.checks.map((c, order) => ({ ...c, tripId, order })));
     await d.prep.bulkPut(s.prep.map((p, order) => ({ ...p, tripId, order })));
     await d.log.bulkPut(s.log.map((l) => ({ ...l, tripId })));
+    await d.expenses.bulkPut(s.expenses.map((x) => ({ ...x, tripId })));
   });
 }
 
-const TRIP_TABLES = (d: TravelDB) => [d.places, d.bookings, d.days, d.sources, d.checks, d.prep, d.log];
+const TRIP_TABLES = (d: TravelDB) => [d.places, d.bookings, d.days, d.sources, d.checks, d.prep, d.log, d.expenses];
 
 /** Replaces the whole local copy of a trip (used when merging server changes). */
 export async function replaceTrip(tripId: string, s: TripState, d: TravelDB = db) {
@@ -179,7 +180,7 @@ export async function removeTripLocal(tripId: string, d: TravelDB = db) {
 export async function loadState(tripId: string, d: TravelDB = db): Promise<TripState | undefined> {
   const trip = await d.trips.get(tripId);
   if (!trip) return undefined;
-  const [places, bookings, days, sources, checks, prep, log] = await Promise.all([
+  const [places, bookings, days, sources, checks, prep, log, expenses] = await Promise.all([
     d.places.where({ tripId }).toArray(),
     d.bookings.where({ tripId }).toArray(),
     d.days.where({ tripId }).toArray(),
@@ -187,6 +188,7 @@ export async function loadState(tripId: string, d: TravelDB = db): Promise<TripS
     d.checks.where({ tripId }).toArray(),
     d.prep.where({ tripId }).toArray(),
     d.log.where({ tripId }).reverse().sortBy("at"),
+    d.expenses.where({ tripId }).toArray(),
   ]);
   return {
     trip,
@@ -197,6 +199,7 @@ export async function loadState(tripId: string, d: TravelDB = db): Promise<TripS
     checks: checks.sort(bySort).map(({ order: _o, ...c }) => strip(c)),
     prep: prep.sort(bySort).map(({ order: _o, ...p }) => strip(p)),
     log: log.map(strip),
+    expenses: expenses.map(strip).sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id)),
   };
 }
 
@@ -248,6 +251,26 @@ export async function saveDaySummary(tripId: string, date: ISODate, text: string
     if (text.trim()) day.summary = { text: text.trim(), lang: day.summary?.lang ?? lang }; else delete day.summary;
     await d.days.put(day);
     await logEntry(d, tripId, `Summary of ${date} ${text.trim() ? "updated" : "removed"}`);
+  });
+  await wrote(tripId, d);
+}
+
+export async function saveExpense(tripId: string, x: Expense, d: TravelDB = db) {
+  await d.transaction("rw", [d.expenses, d.log], async () => {
+    const prev = await d.expenses.get(x.id);
+    await d.expenses.put({ ...x, tripId });
+    await logEntry(d, tripId, `${prev ? "Edited" : "Added"} expense ${x.amount} ${x.currency} (${x.category}) on ${x.date}`);
+  });
+  await wrote(tripId, d);
+}
+
+/** Deletes an expense; the caller confirms first, and the log keeps the amount. */
+export async function deleteExpense(tripId: string, id: string, d: TravelDB = db) {
+  await d.transaction("rw", [d.expenses, d.log], async () => {
+    const x = await d.expenses.get(id);
+    if (!x) return;
+    await d.expenses.delete(id);
+    await logEntry(d, tripId, `Deleted expense ${x.amount} ${x.currency} (${x.category}) of ${x.date}`);
   });
   await wrote(tripId, d);
 }

@@ -1,6 +1,6 @@
 // Local, offline-first copy of every trip (IndexedDB). localStorage is never used for data.
 import Dexie, { type EntityTable } from "dexie";
-import type { Booking, Check, Day, LogEntry, Place, PrepSection, Source, Trip } from "../model/types";
+import type { Booking, Check, Day, Expense, LogEntry, Place, PrepSection, Source, Trip } from "../model/types";
 import type { FieldTs } from "../sync/merge";
 import type { Data, Kind } from "../sync/records";
 
@@ -63,6 +63,7 @@ export class TravelDB extends Dexie {
   syncState!: EntityTable<SyncState, "tripId">;
   conflicts!: EntityTable<Conflict, "id">;
   blobs!: EntityTable<StoredBlob, "path">;
+  expenses!: EntityTable<WithTrip<Expense>, "id">;
 
   constructor(name = "travel-guide") {
     super(name);
@@ -83,6 +84,7 @@ export class TravelDB extends Dexie {
       conflicts: "id, tripId",
     });
     this.version(3).stores({ blobs: "path, tripId" });
+    this.version(4).stores({ expenses: "id, tripId" });
   }
 }
 

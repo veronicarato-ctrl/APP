@@ -2,7 +2,7 @@
 import "fake-indexeddb/auto";
 import { beforeAll, describe, expect, it } from "vitest";
 import { TravelDB } from "../src/db/db";
-import { createTrip, deleteSlot, deleteTrip, listTrips, loadExampleTrip, loadState, onLocalWrite, saveBooking, saveSlot } from "../src/db/repo";
+import { createTrip, deleteExpense, deleteSlot, deleteTrip, listTrips, loadExampleTrip, loadState, onLocalWrite, saveBooking, saveDaySummary, saveExpense, saveSlot } from "../src/db/repo";
 import { recordLocalChanges, pendingCount } from "../src/sync/engine";
 import { syncAll } from "../src/sync/multi";
 import { runRules } from "../src/engine/rules";
@@ -81,6 +81,22 @@ describe("two phones sharing a trip", () => {
     expect(c[0].fields).toEqual([{ field: "tel", mine: "+55 92 2222", theirs: "+55 92 1111", kept: "mine" }]);
     await syncA();
     for (const d of [A, B]) expect((await get(d)).bookings.find((x) => x.key === "h4")!.tel).toBe("+55 92 2222");
+  });
+});
+
+describe("budget and day notes between the two phones", () => {
+  it("shares an expense and a day summary, then the deletion of the expense", async () => {
+    await saveExpense(trip, { id: "e1", date: "2026-12-15", amount: 180, currency: "BRL", category: "food", who: "Ana" }, A);
+    await saveDaySummary(trip, "2026-12-15", "Dunas e falésias.", "pt", B);
+    await syncA(); await syncB(); await syncA();
+    for (const d of [A, B]) {
+      const s = await get(d);
+      expect(s.expenses).toEqual([{ id: "e1", date: "2026-12-15", amount: 180, currency: "BRL", category: "food", who: "Ana" }]);
+      expect(s.days["2026-12-15"].summary).toEqual({ text: "Dunas e falésias.", lang: "pt" });
+    }
+    await deleteExpense(trip, "e1", B);
+    await syncB(); await syncA();
+    expect((await get(A)).expenses).toEqual([]);
   });
 });
 

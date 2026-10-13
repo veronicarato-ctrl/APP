@@ -7,10 +7,11 @@ import { fmtDay, fmtDayLong } from "./format";
 import { Button, Card, IssueBox, SectionLabel, Sources, T } from "./primitives";
 import { Conflicts, SyncPage } from "./SyncPage";
 import { PlacesPage } from "./Places";
+import { BudgetPage, budgetSummary, useTripRate } from "./BudgetPage";
 import { useCloudStatus } from "../sync/cloud";
 
-export type PracticalPage = "lodging" | "transport" | "bookings" | "places" | "prepare" | "verification" | "sync";
-const LATER: Record<string, number> = { budget: 6, safety: 6, emergency: 6, translate: 6 };
+export type PracticalPage = "lodging" | "transport" | "bookings" | "budget" | "places" | "prepare" | "verification" | "sync";
+const LATER: Record<string, number> = { safety: 6, emergency: 6, translate: 6 };
 
 interface Actions {
   openBooking: (id: string | null) => void;
@@ -23,6 +24,8 @@ interface Actions {
 export function Practical({ s, issues, page, setPage, actions }: { s: TripState; issues: Issue[]; page: PracticalPage | null; setPage: (p: PracticalPage | null) => void; actions: Actions }) {
   const { t } = useTranslation();
   const cloud = useCloudStatus();
+  // Before any early return: hooks must run in the same order on every render.
+  const { rates } = useTripRate(s);
   if (page) {
     return (
       <div>
@@ -32,6 +35,7 @@ export function Practical({ s, issues, page, setPage, actions }: { s: TripState;
         {page === "transport" && <Transport s={s} openBooking={actions.openBooking} />}
         {page === "bookings" && <Bookings s={s} openBooking={actions.openBooking} />}
         {page === "places" && <PlacesPage s={s} />}
+        {page === "budget" && <BudgetPage s={s} openSettings={actions.openSettings} />}
         {page === "prepare" && <Prepare s={s} />}
         {page === "verification" && <Verification s={s} issues={issues} actions={actions} />}
         {page === "sync" && <SyncPage />}
@@ -47,7 +51,7 @@ export function Practical({ s, issues, page, setPage, actions }: { s: TripState;
     ["lodging", t("practical.lodgingSummary", { count: lodgings.length, nights })],
     ["transport", t("practical.transportSummary", { count: legs })],
     ["bookings", t("practical.bookingsSummary", { urgent: count("urgent"), todo: count("todo"), confirmed: count("confirmed") }), count("urgent") > 0],
-    ["budget", ""],
+    ["budget", budgetSummary(s, rates, t)],
     ["prepare", t("practical.prepareSummary", { count: s.prep.length })],
     ["safety", ""],
     ["emergency", ""],

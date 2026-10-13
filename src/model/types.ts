@@ -21,6 +21,21 @@ export interface Price {
   nature?: PriceNature;
   /** Price as written in the source when it cannot be structured without guessing. */
   note?: Text;
+  /** Whether the amount is per person or for all the travellers; unknown when absent. */
+  per?: "person" | "group";
+}
+
+export type ExpenseCategory = "lodging" | "food" | "activities" | "transport" | "other";
+
+/** Money actually spent, entered by the travellers. */
+export interface Expense {
+  id: string;
+  date: ISODate;
+  amount: number;
+  currency: string;
+  category: ExpenseCategory;
+  note?: Text;
+  who: string;
 }
 
 export interface Source {
@@ -227,4 +242,5 @@ export interface TripState {
   checks: Check[];
   prep: PrepSection[];
   log: LogEntry[];
+  expenses: Expense[];
 }
