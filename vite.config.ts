@@ -32,6 +32,8 @@ export default defineConfig({
         // The whole app shell, welcome photos included, is precached, so it opens in airplane mode.
         globPatterns: ["**/*.{js,css,html,svg,png,jpg,jpeg,webp,woff2}"],
         navigateFallback: "/index.html",
+        // The assistant endpoint is never answered from the offline cache.
+        navigateFallbackDenylist: [/^\/api\//],
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
         runtimeCaching: [
           {
@@ -50,6 +52,6 @@ export default defineConfig({
   ],
   test: {
     environment: "node",
-    include: ["src/**/*.test.ts", "src/**/*.test.tsx", "supabase/**/*.test.ts"],
+    include: ["src/**/*.test.ts", "src/**/*.test.tsx", "supabase/**/*.test.ts", "server/**/*.test.ts"],
   },
 });
