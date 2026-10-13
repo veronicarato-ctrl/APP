@@ -47,6 +47,9 @@ Read `SPEC.md` (French, the product specification) before any change. The refere
 - `npm run dev` start the app, `npm test` run all tests, `npm run typecheck`, `npm run build`.
 - Sync tests (`supabase/*.test.ts`) run the real SQL migrations in embedded PostgreSQL (PGlite);
   any change to `supabase/migrations` or `src/sync/merge.ts` must keep both merge rules identical.
+- The assistant runs in `api/assistant.ts` (Vercel Function) with its logic in `server/`; AI and directory keys
+  (`ANTHROPIC_API_KEY`, `OPENAI_*`, `MISTRAL_*`, `GOOGLE_PLACES_API_KEY`) are server variables, never `VITE_`.
+  The protocol shared with the app is `src/assistant/protocol.ts`; the AI only proposes operations.
 - Supabase and Vercel setup for the user: `SETUP.md`. Only public settings (`VITE_SUPABASE_URL`,
   `VITE_SUPABASE_ANON_KEY`) go to the frontend; never a service_role/secret key.
 - Write the test before considering a rule done. The Brazil seed must produce exactly two errors on
