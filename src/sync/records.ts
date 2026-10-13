@@ -17,7 +17,7 @@ export function explode(s: TripState): Rec[] {
   for (const p of Object.values(s.places)) out.push({ kind: "place", id: p.id, data: clean(p) });
   s.bookings.forEach((b, pos) => out.push({ kind: "booking", id: b.id, data: clean({ ...b, pos }) }));
   for (const d of Object.values(s.days)) {
-    out.push({ kind: "day", id: d.date, data: clean({ date: d.date, note: d.note }) });
+    out.push({ kind: "day", id: d.date, data: clean({ date: d.date, summary: d.summary, note: d.note }) });
     d.slots.forEach((x, pos) => out.push({ kind: "slot", id: x.id, data: clean({ ...x, date: d.date, pos }) }));
   }
   for (const x of Object.values(s.sources)) out.push({ kind: "source", id: x.id, data: clean(x) });
@@ -38,7 +38,7 @@ export function implode(recs: Rec[]): TripState {
   const trip = of("trip")[0];
   if (!trip) throw new Error("Trip record missing");
   const days: TripState["days"] = {};
-  for (const d of of("day")) days[d.date as string] = { date: d.date as string, ...(d.note ? { note: d.note } : {}), slots: [] } as TripState["days"][string];
+  for (const d of of("day")) days[d.date as string] = { date: d.date as string, ...(d.summary ? { summary: d.summary } : {}), ...(d.note ? { note: d.note } : {}), slots: [] } as TripState["days"][string];
   for (const x of of("slot").sort(byPos)) {
     const { date, ...slot } = noPos(x);
     (days[date as string] ??= { date: date as string, slots: [] }).slots.push(slot as never);
