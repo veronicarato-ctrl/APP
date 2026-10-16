@@ -2,7 +2,7 @@
 import "fake-indexeddb/auto";
 import { beforeAll, describe, expect, it } from "vitest";
 import { TravelDB } from "../src/db/db";
-import { createTrip, deleteSlot, deleteTrip, listTrips, loadExampleTrip, loadState, onLocalWrite, saveBooking, saveSlot } from "../src/db/repo";
+import { createTrip, deleteExpense, deleteSlot, deleteTrip, listTrips, loadExampleTrip, loadState, onLocalWrite, saveBooking, saveDaySummary, saveExpense, saveSlot } from "../src/db/repo";
 import { recordLocalChanges, pendingCount } from "../src/sync/engine";
 import { syncAll } from "../src/sync/multi";
 import { runRules } from "../src/engine/rules";
@@ -84,8 +84,24 @@ describe("two phones sharing a trip", () => {
   });
 });
 
+describe("budget and day notes between the two phones", () => {
+  it("shares an expense and a day summary, then the deletion of the expense", async () => {
+    await saveExpense(trip, { id: "e1", date: "2026-12-15", amount: 180, currency: "BRL", category: "food", who: "Ana" }, A);
+    await saveDaySummary(trip, "2026-12-15", "Dunas e falésias.", "pt", B);
+    await syncA(); await syncB(); await syncA();
+    for (const d of [A, B]) {
+      const s = await get(d);
+      expect(s.expenses).toEqual([{ id: "e1", date: "2026-12-15", amount: 180, currency: "BRL", category: "food", who: "Ana" }]);
+      expect(s.days["2026-12-15"].summary).toEqual({ text: "Dunas e falésias.", lang: "pt" });
+    }
+    await deleteExpense(trip, "e1", B);
+    await syncB(); await syncA();
+    expect((await get(A)).expenses).toEqual([]);
+  });
+});
+
 describe("several trips per account", () => {
-  const NEW = { name: "Japan", lang: "en" as const, start: "2027-04-01", end: "2027-04-03", adults: 2, children: [], origin: "Geneva", homeTz: "Europe/Paris", homeCurrency: "EUR", destTz: "Asia/Tokyo", themeKey: "neutral" };
+  const NEW = { name: "Japan", lang: "en" as const, start: "2027-04-01", end: "2027-04-03", adults: 2, children: [], origin: "Geneva", homeTz: "Europe/Paris", homeCurrency: "EUR", destCurrency: "JPY", budget: 3000, intent: "Deux semaines au Japon, temples et onsen.", modes: { culture: 5, relaxation: 3 } };
 
   it("a new trip stays private until its owner invites someone", async () => {
     const japan = await createTrip(NEW, A);

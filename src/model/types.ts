@@ -21,6 +21,21 @@ export interface Price {
   nature?: PriceNature;
   /** Price as written in the source when it cannot be structured without guessing. */
   note?: Text;
+  /** Whether the amount is per person or for all the travellers; unknown when absent. */
+  per?: "person" | "group";
+}
+
+export type ExpenseCategory = "lodging" | "food" | "activities" | "transport" | "other";
+
+/** Money actually spent, entered by the travellers. */
+export interface Expense {
+  id: string;
+  date: ISODate;
+  amount: number;
+  currency: string;
+  category: ExpenseCategory;
+  note?: Text;
+  who: string;
 }
 
 export interface Source {
@@ -131,10 +146,14 @@ export interface Slot {
   sources?: string[];
   origin: "user" | "ai" | "import";
   info?: InfoNature;
+  /** Ticked by the travellers once done; a status of the trip, not a change of the plan. */
+  done?: boolean;
 }
 
 export interface Day {
   date: ISODate;
+  /** One sentence that sums up the day. */
+  summary?: Text;
   note?: Text;
   slots: Slot[];
 }
@@ -181,6 +200,9 @@ export interface TripTheme {
   regions: Record<string, { onDark: string; onLight: string }>;
 }
 
+/** Travel themes the traveller rates from 0 (not for us) to 5 (essential), SPEC section 6.2. */
+export type TravelMode = "gastronomy" | "relaxation" | "sportNature" | "culture" | "discovery" | "luxury" | "localLife";
+
 export interface Trip {
   id: string;
   name: Text;
@@ -190,12 +212,22 @@ export interface Trip {
   origin: Text;
   homeTz: string;
   homePlug: { types: string[]; voltage: number };
+  /** Currency of the traveller's home country (ISO 4217). */
   homeCurrency: string;
+  /** Currency of the visited country (ISO 4217), for the double-currency budget (SPEC section 7.9). */
+  destCurrency?: string;
+  /** Total budget for all travellers, in homeCurrency. */
   budget: number | null;
+  /** The traveller's wishes in their own words, kept verbatim (SPEC section 6.1). */
+  intent?: Text;
+  /** Cover photo chosen by the travellers, so the picture always shows their own trip. */
+  cover?: FileRef;
+  /** Rating of each travel theme; an absent theme was not rated. */
+  modes?: Partial<Record<TravelMode, number>>;
   rules: TripRules;
   regions: Region[];
   theme: TripTheme;
-  /** Default zone for new places of this trip (IANA). */
+  /** Default zone for new places (IANA). Set by older trips and the example; no longer asked. */
   destTz?: string;
   prepNote?: Text;
   v: number;
@@ -210,4 +242,5 @@ export interface TripState {
   checks: Check[];
   prep: PrepSection[];
   log: LogEntry[];
+  expenses: Expense[];
 }

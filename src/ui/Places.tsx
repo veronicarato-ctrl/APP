@@ -1,15 +1,12 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { ZONES } from "../lib/zones";
 import { deletePlace, savePlace } from "../db/repo";
 import { parseCoords } from "../lib/coords";
 import { newId } from "../lib/ids";
 import type { Place, TripState } from "../model/types";
 import { Button, Card, Field, Sheet, T } from "./primitives";
 import { regionColor } from "./regions";
-
-const ZONES: string[] = (() => {
-  try { return Intl.supportedValuesOf("timeZone"); } catch { return ["UTC"]; }
-})();
 
 export function PlacesPage({ s }: { s: TripState }) {
   const { t } = useTranslation();
@@ -44,7 +41,7 @@ export function PlaceEditor({ s, place, onClose, onSaved }: { s: TripState; plac
   const lang = s.trip.name.lang;
   const [name, setName] = useState(place?.name.text ?? "");
   const [coords, setCoords] = useState(typeof place?.lat === "number" ? `${place.lat}, ${place.lng}` : "");
-  const [tz, setTz] = useState(place?.tz ?? s.trip.destTz ?? s.trip.homeTz);
+  const [tz, setTz] = useState(place?.tz ?? Object.values(s.places).at(-1)?.tz ?? s.trip.destTz ?? s.trip.homeTz);
   const [region, setRegion] = useState(place?.region ?? "");
   const [approx, setApprox] = useState(place?.approx ?? false);
   const [err, setErr] = useState<string>();

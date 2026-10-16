@@ -4,7 +4,7 @@ import { importBrazil, PROTOTYPE } from "../data/importBrazil";
 import { THEMES } from "../data/themes";
 import { dateRange } from "../lib/dates";
 import { newId } from "../lib/ids";
-import type { Booking, Check, ISODate, Place, Slot, Trip, TripState } from "../model/types";
+import type { Booking, Check, Expense, ISODate, Lang, Place, Slot, TravelMode, Trip, TripState } from "../model/types";
 
 type WriteListener = (tripId: string, d: TravelDB, opts: { baseline?: boolean }) => void | Promise<void>;
 const listeners = new Set<WriteListener>();
@@ -40,8 +40,13 @@ export interface NewTrip {
   origin: string;
   homeTz: string;
   homeCurrency: string;
-  destTz: string;
-  themeKey: string;
+  /** Currency of the visited country; empty when not known yet. */
+  destCurrency: string;
+  /** Total for all travellers, in homeCurrency. */
+  budget: number | null;
+  /** The traveller's wishes, kept verbatim; empty when not given. */
+  intent: string;
+  modes: Partial<Record<TravelMode, number>>;
 }
 
 /** Creates an empty trip with one day per date and the default rules of SPEC section 8. */
@@ -58,15 +63,18 @@ export async function createTrip(input: NewTrip, d: TravelDB = db) {
     homeTz: input.homeTz,
     homePlug: { types: [], voltage: 0 },
     homeCurrency: input.homeCurrency,
-    budget: null,
+    ...(input.destCurrency ? { destCurrency: input.destCurrency } : {}),
+    budget: input.budget,
+    ...(input.intent.trim() ? { intent: { text: input.intent, lang: input.lang } } : {}),
+    modes: input.modes,
     rules: { maxHeavy: 2, siesta: false, checkoutBy: "10:00", minMarginMin: null },
     regions: [],
-    theme: THEMES[input.themeKey] ?? THEMES.neutral,
-    destTz: input.destTz,
+    // Colours are set by the app, not chosen in the form (change request of 10 October 2026).
+    theme: THEMES.neutral,
     v: 2,
   };
   const days = Object.fromEntries(dateRange(input.start, input.end).map((date) => [date, { date, slots: [] }]));
-  await saveState({ trip, places: {}, bookings: [], days, sources: {}, checks: [], prep: [], log: [] }, d);
+  await saveState({ trip, places: {}, bookings: [], days, sources: {}, checks: [], prep: [], log: [], expenses: [] }, d);
   await d.log.add({ id: newId(), tripId: id, at: new Date().toISOString(), who: actor, message: `Created trip “${input.name}”` });
   await wrote(id, d);
   await setActiveTripId(id, d);
@@ -138,7 +146,7 @@ export async function deletePlace(tripId: string, placeId: string, d: TravelDB =
 
 export async function saveState(s: TripState, d: TravelDB = db) {
   const tripId = s.trip.id;
-  await d.transaction("rw", [d.trips, d.places, d.bookings, d.days, d.sources, d.checks, d.prep, d.log], async () => {
+  await d.transaction("rw", [d.trips, d.places, d.bookings, d.days, d.sources, d.checks, d.prep, d.log, d.expenses], async () => {
     await d.trips.put(s.trip);
     await d.places.bulkPut(Object.values(s.places).map((p) => ({ ...p, tripId })));
     await d.bookings.bulkPut(s.bookings.map((b, order) => ({ ...b, tripId, order })));
@@ -147,10 +155,11 @@ export async function saveState(s: TripState, d: TravelDB = db) {
     await d.checks.bulkPut(s.checks.map((c, order) => ({ ...c, tripId, order })));
     await d.prep.bulkPut(s.prep.map((p, order) => ({ ...p, tripId, order })));
     await d.log.bulkPut(s.log.map((l) => ({ ...l, tripId })));
+    await d.expenses.bulkPut(s.expenses.map((x) => ({ ...x, tripId })));
   });
 }
 
-const TRIP_TABLES = (d: TravelDB) => [d.places, d.bookings, d.days, d.sources, d.checks, d.prep, d.log];
+const TRIP_TABLES = (d: TravelDB) => [d.places, d.bookings, d.days, d.sources, d.checks, d.prep, d.log, d.expenses];
 
 /** Replaces the whole local copy of a trip (used when merging server changes). */
 export async function replaceTrip(tripId: string, s: TripState, d: TravelDB = db) {
@@ -158,6 +167,34 @@ export async function replaceTrip(tripId: string, s: TripState, d: TravelDB = db
     for (const t of TRIP_TABLES(d)) await t.where({ tripId }).delete();
     await saveState(s, d);
   });
+}
+
+/**
+ * Writes the changes the travellers accepted from the assistant, keeps the previous trip so the last
+ * application can be undone, and records each change in the history.
+ */
+export async function applyAssistantChanges(before: TripState, after: TripState, messages: string[], d: TravelDB = db) {
+  const tripId = before.trip.id;
+  await d.settings.put({ key: `undo:${tripId}`, value: { at: new Date().toISOString(), state: { ...before, log: [] } } });
+  await replaceTrip(tripId, { ...after, log: before.log }, d);
+  for (const m of messages) await logEntry(d, tripId, m);
+  await wrote(tripId, d);
+}
+
+export async function lastAssistantUndo(tripId: string, d: TravelDB = db) {
+  return (await d.settings.get(`undo:${tripId}`))?.value as { at: string; state: TripState } | undefined;
+}
+
+/** Puts the trip back as it was before the last assistant application; the history keeps both steps. */
+export async function undoAssistantChanges(tripId: string, d: TravelDB = db) {
+  const u = await lastAssistantUndo(tripId, d);
+  const now = await loadState(tripId, d);
+  if (!u || !now) return false;
+  await replaceTrip(tripId, { ...u.state, log: now.log }, d);
+  await logEntry(d, tripId, "Undid the last changes accepted from the assistant");
+  await d.settings.delete(`undo:${tripId}`);
+  await wrote(tripId, d);
+  return true;
 }
 
 /** Removes a trip from this phone without stamping anything (used when it was deleted elsewhere). */
@@ -171,7 +208,7 @@ export async function removeTripLocal(tripId: string, d: TravelDB = db) {
 export async function loadState(tripId: string, d: TravelDB = db): Promise<TripState | undefined> {
   const trip = await d.trips.get(tripId);
   if (!trip) return undefined;
-  const [places, bookings, days, sources, checks, prep, log] = await Promise.all([
+  const [places, bookings, days, sources, checks, prep, log, expenses] = await Promise.all([
     d.places.where({ tripId }).toArray(),
     d.bookings.where({ tripId }).toArray(),
     d.days.where({ tripId }).toArray(),
@@ -179,6 +216,7 @@ export async function loadState(tripId: string, d: TravelDB = db): Promise<TripS
     d.checks.where({ tripId }).toArray(),
     d.prep.where({ tripId }).toArray(),
     d.log.where({ tripId }).reverse().sortBy("at"),
+    d.expenses.where({ tripId }).toArray(),
   ]);
   return {
     trip,
@@ -189,6 +227,7 @@ export async function loadState(tripId: string, d: TravelDB = db): Promise<TripS
     checks: checks.sort(bySort).map(({ order: _o, ...c }) => strip(c)),
     prep: prep.sort(bySort).map(({ order: _o, ...p }) => strip(p)),
     log: log.map(strip),
+    expenses: expenses.map(strip).sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id)),
   };
 }
 
@@ -215,6 +254,51 @@ export async function saveSlot(tripId: string, fromDate: ISODate, slot: Slot, to
     }
     const verb = i >= 0 ? "Edited" : "Added";
     await logEntry(d, tripId, `${verb} “${slot.title.text}”${toDate !== fromDate ? ` and moved from ${fromDate} to ${toDate}` : ` on ${fromDate}`}`);
+  });
+  await wrote(tripId, d);
+}
+
+/** Ticks or unticks an activity as done. Allowed on locked slots: it records what happened, the plan is unchanged. */
+export async function setSlotDone(tripId: string, date: ISODate, slotId: string, done: boolean, d: TravelDB = db) {
+  await d.transaction("rw", [d.days, d.log], async () => {
+    const day = await d.days.get([tripId, date]);
+    const x = day?.slots.find((y) => y.id === slotId);
+    if (!day || !x) return;
+    if (done) x.done = true; else delete x.done;
+    await d.days.put(day);
+    await logEntry(d, tripId, `${done ? "Done" : "Not done"}, “${x.title.text}” on ${date}`);
+  });
+  await wrote(tripId, d);
+}
+
+/** Sets or clears the one-sentence summary of a day. */
+export async function saveDaySummary(tripId: string, date: ISODate, text: string, lang: Lang, d: TravelDB = db) {
+  await d.transaction("rw", [d.days, d.log], async () => {
+    const day = await d.days.get([tripId, date]);
+    if (!day) throw new Error("Day not found");
+    if (text.trim()) day.summary = { text: text.trim(), lang: day.summary?.lang ?? lang }; else delete day.summary;
+    await d.days.put(day);
+    await logEntry(d, tripId, `Summary of ${date} ${text.trim() ? "updated" : "removed"}`);
+  });
+  await wrote(tripId, d);
+}
+
+export async function saveExpense(tripId: string, x: Expense, d: TravelDB = db) {
+  await d.transaction("rw", [d.expenses, d.log], async () => {
+    const prev = await d.expenses.get(x.id);
+    await d.expenses.put({ ...x, tripId });
+    await logEntry(d, tripId, `${prev ? "Edited" : "Added"} expense ${x.amount} ${x.currency} (${x.category}) on ${x.date}`);
+  });
+  await wrote(tripId, d);
+}
+
+/** Deletes an expense; the caller confirms first, and the log keeps the amount. */
+export async function deleteExpense(tripId: string, id: string, d: TravelDB = db) {
+  await d.transaction("rw", [d.expenses, d.log], async () => {
+    const x = await d.expenses.get(id);
+    if (!x) return;
+    await d.expenses.delete(id);
+    await logEntry(d, tripId, `Deleted expense ${x.amount} ${x.currency} (${x.category}) of ${x.date}`);
   });
   await wrote(tripId, d);
 }

@@ -1,7 +1,7 @@
 import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it } from "vitest";
 import { TravelDB } from "./db";
-import { createTrip, deleteSlot, deletePlace, deleteTrip, getActiveTripId, listTrips, loadExampleTrip, loadState, saveBooking, savePlace, saveSlot, setActiveTripId, updateTrip } from "./repo";
+import { applyAssistantChanges, createTrip, lastAssistantUndo, saveDaySummary, undoAssistantChanges, setSlotDone, deleteSlot, deletePlace, deleteTrip, getActiveTripId, listTrips, loadExampleTrip, loadState, saveBooking, savePlace, saveSlot, setActiveTripId, updateTrip } from "./repo";
 import { BRAZIL_TRIP_KEY, importBrazil } from "../data/importBrazil";
 import { runRules } from "../engine/rules";
 
@@ -48,7 +48,48 @@ describe("local storage", () => {
   });
 });
 
-const NEW = { name: "Japan", lang: "en" as const, start: "2027-04-01", end: "2027-04-03", adults: 2, children: [], origin: "Geneva", homeTz: "Europe/Paris", homeCurrency: "EUR", destTz: "Asia/Tokyo", themeKey: "neutral" };
+const NEW = { name: "Japan", lang: "en" as const, start: "2027-04-01", end: "2027-04-03", adults: 2, children: [], origin: "Geneva", homeTz: "Europe/Paris", homeCurrency: "EUR", destCurrency: "JPY", budget: 3000, intent: "Deux semaines au Japon, temples et onsen.", modes: { culture: 5, relaxation: 3 } };
+
+describe("day summary and done activities", () => {
+  it("ticks an activity done, even on a locked slot, and logs it", async () => {
+    const id = (await getActiveTripId(d))!;
+    const s = (await loadState(id, d))!;
+    const date = Object.keys(s.days).sort().find((x) => s.days[x].slots.length)!;
+    const x = s.days[date].slots[0];
+    await setSlotDone(id, date, x.id, true, d);
+    expect((await loadState(id, d))!.days[date].slots[0].done).toBe(true);
+    await setSlotDone(id, date, x.id, false, d);
+    const after = (await loadState(id, d))!;
+    expect(after.days[date].slots[0].done).toBeUndefined();
+    expect(after.log.some((l) => l.message.startsWith("Done,"))).toBe(true);
+  });
+  it("sets and clears the summary of a day", async () => {
+    const id = (await getActiveTripId(d))!;
+    await saveDaySummary(id, "2026-12-15", "  Dunes and cliffs of Canoa Quebrada.  ", "en", d);
+    expect((await loadState(id, d))!.days["2026-12-15"].summary).toEqual({ text: "Dunes and cliffs of Canoa Quebrada.", lang: "en" });
+    await saveDaySummary(id, "2026-12-15", "", "en", d);
+    expect((await loadState(id, d))!.days["2026-12-15"].summary).toBeUndefined();
+  });
+});
+
+describe("assistant changes", () => {
+  it("applies accepted changes with their history, and undoes them", async () => {
+    const id = (await getActiveTripId(d))!;
+    const before = (await loadState(id, d))!;
+    const after = structuredClone(before);
+    after.days["2026-12-15"].summary = { text: "Proposed summary.", lang: "en" };
+    await applyAssistantChanges(before, after, ["Assistant: summary of 2026-12-15"], d);
+    const s1 = (await loadState(id, d))!;
+    expect(s1.days["2026-12-15"].summary?.text).toBe("Proposed summary.");
+    expect(s1.log[0].message).toBe("Assistant: summary of 2026-12-15");
+    expect(await lastAssistantUndo(id, d)).toBeDefined();
+    expect(await undoAssistantChanges(id, d)).toBe(true);
+    const s2 = (await loadState(id, d))!;
+    expect(s2.days["2026-12-15"].summary).toBeUndefined();
+    expect(s2.log.map((l) => l.message).slice(0, 2)).toEqual(["Undid the last changes accepted from the assistant", "Assistant: summary of 2026-12-15"]);
+    expect(await undoAssistantChanges(id, d)).toBe(false);
+  });
+});
 
 describe("several trips", () => {
   it("creates an empty trip with one day per date and makes it the active one", async () => {
@@ -58,6 +99,20 @@ describe("several trips", () => {
     expect(Object.keys(s.days).sort()).toEqual(["2027-04-01", "2027-04-02", "2027-04-03"]);
     expect(s.bookings).toEqual([]);
     expect((await listTrips(d)).map((t) => t.name.text)).toEqual(["Brasil, praia e Amazónia", "Japan"]);
+  });
+
+  it("keeps the wishes word for word, the budget, both currencies and the themes, with app-chosen colours", async () => {
+    const id = await createTrip(NEW, d);
+    const { trip } = (await loadState(id, d))!;
+    expect(trip.intent).toEqual({ text: "Deux semaines au Japon, temples et onsen.", lang: "en" });
+    expect(trip.budget).toBe(3000);
+    expect([trip.homeCurrency, trip.destCurrency]).toEqual(["EUR", "JPY"]);
+    expect(trip.modes).toEqual({ culture: 5, relaxation: 3 });
+    expect(trip.theme.dark).toBe("#1d3557");
+    expect(trip.destTz).toBeUndefined();
+    const bare = await createTrip({ ...NEW, intent: "  ", destCurrency: "", budget: null, modes: {} }, d);
+    const b = (await loadState(bare, d))!.trip;
+    expect([b.intent, b.destCurrency, b.budget]).toEqual([undefined, undefined, null]);
   });
 
   it("keeps trips independent", async () => {

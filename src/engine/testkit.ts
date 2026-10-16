@@ -24,6 +24,6 @@ export function trip(days: Record<string, Slot[]> = {}, bookings: Booking[] = []
     places: {},
     bookings: [booking("night", { kind: "lodging", from: start, to: end }), ...bookings],
     days: Object.fromEntries([start, end].map((d) => [d, { date: d, slots: days[d] ?? [] }])),
-    sources: {}, checks: [], prep: [], log: [],
+    sources: {}, checks: [], prep: [], log: [], expenses: [],
   };
 }

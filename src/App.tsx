@@ -15,10 +15,12 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "./db/db";
 import { setCloudTrip, useCloudStatus } from "./sync/cloud";
 import { TripForm, TripsSheet, Welcome } from "./ui/Trips";
+import { useBlobUrl } from "./ui/useBlobUrl";
+import { AssistantPage } from "./ui/AssistantPage";
+import { MoodSheet } from "./ui/MoodSheet";
 
 type Tab = "today" | "itinerary" | "map" | "practical" | "assistant";
 const TABS: [Tab, string][] = [["today", "☀"], ["itinerary", "☰"], ["map", "⌖"], ["practical", "▦"], ["assistant", "✦"]];
-const PLACEHOLDER: Partial<Record<Tab, string>> = { assistant: "assistant.placeholder" };
 
 export default function App() {
   const { t } = useTranslation();
@@ -31,8 +33,10 @@ export default function App() {
   const [bookingEd, setBookingEd] = useState<{ id: string | null }>();
   const [tripForm, setTripForm] = useState<"new" | "edit">();
   const [tripsOpen, setTripsOpen] = useState(false);
+  const [moodDate, setMoodDate] = useState<ISODate>();
   const [appearance, setAppearance] = useAppearance();
   const cloud = useCloudStatus();
+  const coverUrl = useBlobUrl(s?.trip.cover?.path);
   const conflicts = useLiveQuery(() => db.conflicts.filter((c) => !c.dismissed).count(), []) ?? 0;
 
   useEffect(() => { if (s) applyTripTheme(s.trip.theme); }, [s?.trip.theme]);
@@ -58,7 +62,10 @@ export default function App() {
   return (
     <div className="min-h-dvh pb-24">
       <header className="relative overflow-hidden px-4 pt-[max(1rem,env(safe-area-inset-top))] pb-3"
-        style={{ background: "linear-gradient(135deg, var(--id-darker), var(--id-dark))" }}>
+        style={{ background: coverUrl
+          // The trip's own photo, darkened enough for the white text to keep its contrast.
+          ? `linear-gradient(135deg, color-mix(in srgb, var(--id-darker) 82%, transparent), color-mix(in srgb, var(--id-dark) 78%, transparent)), center / cover no-repeat url("${coverUrl}")`
+          : "linear-gradient(135deg, var(--id-darker), var(--id-dark))" }}>
         <span aria-hidden className="absolute -right-2 top-1 text-[64px] font-black tracking-tight select-none pointer-events-none" style={{ color: "var(--watermark)" }}>{watermark}</span>
         <div className="relative max-w-3xl mx-auto">
           <p className="text-[10px] font-bold tracking-[0.3em] uppercase" style={{ color: "var(--id-accent)" }}>
@@ -101,7 +108,7 @@ export default function App() {
           </button>
         )}
         {tab === "itinerary" && <Itinerary s={s} issues={issues} focus={focus} actions={{ editSlot: (date, id) => setSlotEd({ date, id }), openBooking }} />}
-        {tab === "today" && <Today s={s} issues={issues} actions={{ openBooking, goToDay, openVerification: () => { setTab("practical"); setPage("verification"); } }} />}
+        {tab === "today" && <Today s={s} issues={issues} actions={{ openBooking, goToDay, openVerification: () => { setTab("practical"); setPage("verification"); }, openMood: setMoodDate }} />}
         {tab === "map" && <MapView s={s} date={mapDate} setDate={setMapDate} goToDay={goToDay} />}
         {tab === "practical" && (
           <>
@@ -120,7 +127,7 @@ export default function App() {
             )}
           </>
         )}
-        {PLACEHOLDER[tab] && <p className="text-soft text-sm py-10 text-center">{t(PLACEHOLDER[tab]!)}</p>}
+        {tab === "assistant" && <AssistantPage s={s} openSync={() => { setTab("practical"); setPage("sync"); }} />}
       </main>
 
       <nav className="fixed bottom-0 inset-x-0 z-20 border-t border-line bg-card pb-[env(safe-area-inset-bottom)]">
@@ -144,6 +151,7 @@ export default function App() {
         <BookingEditor key={bookingEd.id ?? "new"} s={s} id={bookingEd.id} onClose={() => setBookingEd(undefined)}
           onSave={async (b) => { await saveBooking(tripId, b); setBookingEd(undefined); }} />
       )}
+      {moodDate && <MoodSheet s={s} date={moodDate} onClose={() => setMoodDate(undefined)} />}
       {tripsOpen && trips && <TripsSheet trips={trips} activeId={activeId} onClose={() => setTripsOpen(false)} onCreate={() => { setTripsOpen(false); setTripForm("new"); }} />}
       {tripForm && <TripForm trip={tripForm === "edit" ? s.trip : undefined} onClose={() => setTripForm(undefined)} />}
     </div>

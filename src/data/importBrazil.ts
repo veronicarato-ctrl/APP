@@ -188,5 +188,6 @@ export function importBrazil(data: RawPrototype = PROTOTYPE, scope: string = BRA
     checks,
     prep,
     log: [],
+    expenses: [],
   };
 }

@@ -8,6 +8,16 @@ describe("records", () => {
     const s = importBrazil();
     expect(implode(explode(s))).toEqual(s);
   });
+  it("keeps the new trip fields through a round trip (wishes, themes, currencies, cover, day summary, done)", () => {
+    const s = importBrazil();
+    s.trip.intent = { text: "Praia e floresta.", lang: "pt" };
+    s.trip.modes = { sportNature: 5, relaxation: 3 };
+    s.trip.destCurrency = "BRL";
+    s.trip.cover = { id: "c", name: "c.jpg", type: "image/jpeg", size: 1, path: `${s.trip.id}/cover/c.jpg`, addedAt: "2026-10-13T00:00:00Z" };
+    s.days["2026-12-15"].summary = { text: "Dunas.", lang: "pt" };
+    s.days["2026-12-15"].slots[0].done = true;
+    expect(implode(explode(s))).toEqual(s);
+  });
   it("record keys are unique", () => {
     const keys = explode(importBrazil()).map((r) => `${r.kind}:${r.id}`);
     expect(new Set(keys).size).toBe(keys.length);

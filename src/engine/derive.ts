@@ -1,6 +1,6 @@
 // Views derived from the single trip state (nothing here is stored).
 import { dateRange, toMinutes } from "../lib/dates";
-import { zonedInstant } from "../lib/time";
+import { wallClock, zonedInstant } from "../lib/time";
 import type { Booking, ISODate, Place, Slot, TripState } from "../model/types";
 
 export interface TrailPoint { date: ISODate; slot: Slot; place: Place }
@@ -102,4 +102,36 @@ export function route(s: TripState, onlyDate?: ISODate): { stops: Stop[]; segmen
     prev = p.place;
   }
   return { stops, segments };
+}
+
+/**
+ * Length of a slot in minutes, from its two local times. A transport may end in another zone and after
+ * midnight, so its times are read in the departure and arrival zones. Undefined when a time is missing.
+ */
+export function slotMinutes(s: TripState, date: ISODate, slot: Slot): number | undefined {
+  const a = toMinutes(slot.start), b = toMinutes(slot.end);
+  if (a === null || b === null) return undefined;
+  if (slot.type !== "transport") return b > a ? b - a : undefined;
+  const { from, to } = transportEnds(s, date, slot);
+  const fromTz = from?.tz ?? slotTz(s, date, slot), toTz = to?.tz ?? fromTz;
+  if (!fromTz || !toTz) return undefined;
+  const dep = zonedInstant(date, slot.start, fromTz).getTime();
+  let arr = zonedInstant(date, slot.end, toTz).getTime();
+  if (arr <= dep) arr += 24 * 3600_000; // lands the next day
+  return Math.round((arr - dep) / 60_000);
+}
+
+export type VisitState = "visited" | "today" | "ahead";
+
+/**
+ * Where each stop of the trip stands at an instant, judged by the date at that place: visited when all its
+ * days are past, today when one of its days is today, ahead otherwise. Computed, never stored.
+ */
+export function placeStates(s: TripState, now: Date): Record<string, VisitState> {
+  const out: Record<string, VisitState> = {};
+  for (const stop of route(s).stops) {
+    const today = wallClock(stop.place.tz, now).date;
+    out[stop.place.id] = stop.dates.includes(today) ? "today" : stop.dates.every((d) => d < today) ? "visited" : "ahead";
+  }
+  return out;
 }
