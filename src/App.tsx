@@ -84,12 +84,23 @@ export default function App() {
             </button>
             {", "}{t("common.locked", { count: locked })}
           </p>
+          <div className="flex flex-wrap gap-1.5 mt-1.5">
+          {/* Always visible way out of the current trip: the list of trips and a new trip. */}
+          <button onClick={() => setTripsOpen(true)} className="min-h-9 text-[12px] font-semibold px-3 rounded-full border"
+            style={{ borderColor: "var(--watermark)", color: "var(--on-dark-title)", background: "var(--watermark)" }}>
+            ☰ {t("trips.myTrips", { count: trips?.length ?? 1 })}
+          </button>
+          <button onClick={() => setTripForm("new")} className="min-h-9 text-[12px] font-semibold px-3 rounded-full border"
+            style={{ borderColor: "var(--watermark)", color: "var(--on-dark-title)", background: "var(--watermark)" }}>
+            + {t("trips.newShort")}
+          </button>
           <button onClick={() => { setTab("practical"); setPage("sync"); }}
-            className="mt-1.5 text-[11.5px] font-semibold px-2.5 py-1 rounded-full border"
+            className="min-h-9 text-[11.5px] font-semibold px-2.5 rounded-full border"
             style={{ borderColor: "var(--watermark)", color: ["unreachable", "forbidden", "error"].includes(cloud.phase) ? "var(--error-on-dark)" : "var(--on-dark)", background: "var(--watermark)" }}>
             {cloud.phase === "syncing" ? "⟳" : cloud.phase === "idle" && !cloud.pending ? "✓" : "●"} {t(`sync.chip_${cloud.phase}`)}
             {cloud.pending > 0 && cloud.phase !== "local" ? ` · ${cloud.pending}` : ""}
           </button>
+          </div>
           {(tab === "itinerary" || tab === "map") && (
             <div className="mt-2">
               <DayStrip s={s} issues={issues} selected={tab === "map" ? mapDate : focus} onSelect={tab === "map" ? setMapDate : goToDay} />

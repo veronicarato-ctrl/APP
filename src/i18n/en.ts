@@ -169,6 +169,7 @@ const en = {
     title: "My trips", welcome: "Welcome", welcomeTitle: "Where to next?", welcomeIntro: "Plan a trip day by day, keep every booking and address at hand, and use it offline on the road.",
     create: "Create a trip", example: "Add the Brazil 2026 example trip", exampleNote: "A complete trip to explore every feature, which you can edit or delete.",
     adults_one: "{{count}} adult", adults_other: "{{count}} adults",
+    myTrips_one: "My trips", myTrips_other: "My trips ({{count}})", newShort: "New trip",
     open: "Open", current: "Shown now", days_one: "{{count}} day", days_other: "{{count}} days", switch: "Trips",
     confirmDelete: "Delete “{{name}}” from this phone and, after the next sync, for everyone who shares it?",
   },
