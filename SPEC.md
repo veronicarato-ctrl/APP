@@ -256,7 +256,7 @@ Stockage limité à Claude et sans synchronisation, aucun mode hors ligne, carte
 6. Exposer la clé API dans le frontend.
 7. Générer un export KML ou Google My Maps.
 8. Envoyer une carte postale ou partager une position sans action explicite de l'utilisateur.
-9. Construire un GPS, un moteur de réservation, un réseau social ou une traduction universelle, qui existent déjà ailleurs.
+9. Construire un GPS, un moteur de réservation, un réseau social ou une traduction universelle, qui existent déjà ailleurs. Les « voyages partagés » de la phase 8 (section 16.6) ne sont pas un réseau social, ils ne comportent ni fil d'actualité, ni abonnés, ni messages entre membres, ni « j'aime ».
 10. Changer le design, la langue ou la stack sans me le demander.
 11. Afficher un numéro d'urgence, une adresse d'ambassade ou un conseil de sécurité sans source officielle et date de vérification.
 12. Écrire une couleur en dur dans un composant, ou laisser un fond noir ou brun.
@@ -300,9 +300,12 @@ Rendre l'application publique, payante et utilisable dans le monde entier, en es
 
 ### 16.3 Grille tarifaire (proposition, à valider après mesure du coût réel de l'IA en phases 4 et 5)
 Repères de la concurrence relevés en octobre 2026, Wanderlog Pro environ 40 dollars par an, TripIt Pro 49 dollars par an, Layla environ 49 dollars par an, Polarsteps Plus 29,99 euros par an ou 8,99 euros par mois.
-1. **Gratuit**, un voyage actif, planification manuelle, moteur de règles, carte, hors ligne, quelques demandes à l'assistant par voyage.
-2. **Pass voyage**, paiement unique par voyage (ordre de grandeur 19 euros ou francs), assistant complet pendant la durée du voyage, partage avec les compagnons de route, fiches sécurité et urgences, cartes postales. C'est l'offre qui distingue l'application, la plupart des voyageurs ne partant que quelques fois par an.
-3. **Annuel**, voyages illimités et assistant en usage raisonnable (ordre de grandeur 49 euros ou francs par an), au niveau de TripIt et Layla mais avec davantage de fonctions.
+Décision du 20 octobre 2026, un prix d'entrée très bas, compensé par les souvenirs, l'affiliation et la conservation des données.
+1. **Gratuit**, un voyage actif, planification manuelle, moteur de règles, carte, hors ligne, quelques demandes à l'assistant par voyage, liens de réservation.
+2. **Pass voyage**, paiement unique par voyage, tout inclus (assistant complet, Mood du jour, partage avec les compagnons de route, partage des dépenses, import des réservations, fiches sécurité et urgences, cartes postales), **6 à 7 euros** (ordre de grandeur 6,99 euros), à confirmer après la mesure du coût réel de l'IA par voyage. C'est l'offre qui distingue l'application, aucun des concurrents étudiés ne vendant un pass par voyage.
+3. **Lot de 3 voyages** et **annuel**, à recalculer à partir du prix du pass (le lot avec une remise visible, l'annuel rentable à partir de quatre ou cinq voyages par an), sans lots de 6 ou 9 voyages qui concurrenceraient l'annuel. Durée de validité des voyages prépayés à fixer avec un expert‑comptable ou un juriste.
+4. **Conservation**, toutes les données du voyage restent gardées après le retour, ce qui permet les souvenirs.
+5. **Souvenirs**, version numérique pour environ 2 euros (poster de la carte du voyage, photo carrée de 20 × 20 cm, fond d'écran, album numérique), et version imprimée livrée (poster de plusieurs formats, livre ou album photo) par un imprimeur à la demande, au prix d'impression plus une marge. Fond de carte dessiné à partir des données du domaine public Natural Earth, jamais à partir des tuiles OpenStreetMap.
 4. Prix adaptés au pouvoir d'achat par pays, plafonds d'usage de l'IA par compte, et prestataire de paiement agissant si possible comme vendeur officiel pour la TVA.
 
 ### 16.4 Langues et marchés
@@ -315,5 +318,15 @@ Repères de la concurrence relevés en octobre 2026, Wanderlog Pro environ 40 do
 3. Passage aux offres payantes de Vercel (Pro) et Supabase (Pro, sans mise en pause), fournisseur de tuiles cartographiques commercial au lieu des serveurs bénévoles d'OpenStreetMap.
 4. Pages légales (conditions, confidentialité selon la LPD et, pour les clients européens, probablement le RGPD, éditeur), suppression de compte, mises en garde renforcées sur la santé, la sécurité et les urgences.
 5. Traductions, revue de sécurité, plafonds d'usage et suivi des coûts de l'IA.
+6. Souvenirs numériques et imprimés (section 16.3, point 5), avec un imprimeur à la demande.
+
+### 16.6 Voyages partagés (après le lancement public)
+Décision du 20 octobre 2026. Après leur retour, les voyageurs qui le souhaitent publient leur voyage pour que d'autres s'en inspirent, puis le copient dans leur propre voyage et le font adapter par l'assistant.
+1. **Contenu**, itinéraire, lieux, budget prévu et budget réel, activités faites, et pour chaque jour une note « ce qui a marché, ce qui n'a pas marché ».
+2. **Protection**, publication sous un prénom ou un pseudonyme choisi, jamais le nom complet par défaut, retrait automatique des références de réservation, téléphones, billets et adresses privées, publication seulement après le retour.
+3. **Récompense**, un crédit (par exemple un pass voyage offert par voyage partagé, plafonné à deux par an) plutôt qu'un pourcentage sur l'annuel, accordé pour le partage d'un vrai voyage (dates passées, activités cochées, notes) et jamais pour un avis positif. Règles sur les avis récompensés et leur mention à faire vérifier par un juriste.
+4. **Hors périmètre**, fil d'actualité, abonnés, messages entre membres, « j'aime » (section 13, point 9).
+5. **Obligations**, moyen de signaler un contenu abusif et de le retirer, conformément aux règles européennes sur les plateformes en ligne, à faire vérifier en phase 8.
+6. Le voyage au Brésil, une fois rentré, peut être le premier voyage partagé.
 
 Avant de commencer, pose‑moi les questions dont tu as besoin.

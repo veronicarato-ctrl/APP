@@ -101,3 +101,11 @@ Toutes ces demandes sont mises en page, avec les décisions à prendre et l'ordr
 ## Tâches à accomplir
 
 - [ ] **Photos de l'accueil** (décision du 13 octobre 2026, reportée). Le mécanisme est en place (alternance toutes les 8 secondes, bouton pause, crédits, hors ligne), la liste `src/data/welcomePhotos.ts` reste vide et l'accueil affiche les couleurs du voyage. À faire plus tard, choisir une douzaine de photos des pays les plus visités avec une licence autorisant l'usage commercial (par exemple Unsplash, licence à lire sur sa page officielle), les déposer dans `public/photos` avec lieu, pays, auteur et lien de la page, puis vérifier que chaque photo montre bien le lieu annoncé.
+
+- [ ] **Voyages partagés** (décision du 20 octobre 2026, phase 8 après le lancement public). Bibliothèque de voyages vécus, publiés après le retour, consultables et copiables, avec récompense en crédit pour le partage. Détail dans la SPEC, section 16.6.
+- [ ] **Grille tarifaire** (décision du 20 octobre 2026). Gratuit, pass voyage tout inclus autour de 6,99 €, lot de 3 et annuel à recalculer, souvenirs numériques autour de 2 € et souvenirs imprimés (poster, livre ou album). Détail dans la SPEC, section 16.3. À confirmer après la mesure du coût de l'IA.
+- [ ] **Souvenirs imprimés et numériques** (phase 5 pour le numérique de l'usage personnel, phase 8 pour la vente et l'impression). Poster de la carte du voyage, photo carrée de 20 × 20 cm, fond d'écran, album ou livre photo.
+
+## Idées à l'étude
+
+- **Voyager ensemble** (idée du 20 octobre 2026). Mettre en relation des voyageurs seuls qui veulent faire le même voyage aux mêmes dates, sans partager de chambre. Avis de Claude, idée réelle mais à ne pas lancer avec une petite équipe ni avant d'avoir beaucoup d'utilisateurs, car elle exige vérification d'identité, sécurité des rencontres, modération et assez de voyageurs sur la même destination aux mêmes dates. Forme plus sûre envisageable plus tard, des départs encadrés par un organisateur professionnel que des voyageurs seuls rejoignent.
